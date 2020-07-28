@@ -5,7 +5,6 @@ export const mockRssParser = jest.fn();
 const mock = jest.fn().mockImplementation(() => {
   return {
     parseURL: async (url) => {
-      console.log("a");
       return rssArticleJson;
     }
   };

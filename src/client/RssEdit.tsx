@@ -1,5 +1,6 @@
 import React, { useContext, useState, createContext, useReducer, useEffect, useRef } from "react";
 import { AppNavBar } from './AppNavBar';
+import { Row, Col, Form, Button } from "react-bootstrap";
 
 type Rss = {
   url: string 
@@ -84,12 +85,10 @@ const useRender = (getEndpoint: string, updateEndpoint: string) => {
 const Rss = ({ rss, index, dispatch }: { rss: Rss, index: number, dispatch: React.Dispatch<RssActionType> }) => {
   return (
     <li>
-      <p>{ rss.url }</p>
-      <ul className="button-list">
-        <li>
-          <button type="button" onClick={() => dispatch(removeRss(index))}>削除</button>
-        </li>
-      </ul>
+      <Row className="rss-row">
+        <Col sm={11}>{ rss.url }</Col>
+        <Col sm={1}><Button type="button" variant="danger" onClick={() => dispatch(removeRss(index))}>Delete</Button></Col>
+      </Row>
     </li>
   );
 };
@@ -106,26 +105,51 @@ const RssList = ({ rsses, dispatch }: { rsses: Rss[], dispatch: React.Dispatch<R
   )
 };
 
-const RssForm = ({ dispatch } : { dispatch: React.Dispatch<RssActionType> }) => {
+//TODO: サーバサイドでちゃんとした検査を実装
+//URLの簡易検査
+function isUrlLike(text: string) {
+  const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/im;
+  
+  return text.match(replacePattern1) !== null;
+}
+
+const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>, rsses: Rss[] }) => {
   const [rssUrl, setRssUrl] = useState('');
   
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if(!rssUrl) return;
+    if(!isUrlLike(rssUrl)) {
+      alert("Illegal URL!!");
+      return;
+    }
+    
+    //重複の簡易検査
+    if(rsses.find(rss => rss.url.toLowerCase() === rssUrl.toLowerCase()) !== undefined) {
+      alert("Duplicated!!");
+      return;
+    }
+
     dispatch(addRss(rssUrl));
     setRssUrl('');
   };
   
   return (
-    <form onSubmit={submitHandler}>
-      <input 
-        type="text"
-        placeholder="Enter RSS URL"
-        value={rssUrl}
-        onChange={e => setRssUrl(e.target.value)}
-      />
-      <button type="submit">Add RSS</button>
-    </form>
+    <Form onSubmit={submitHandler}>
+      <Form.Row className="align-items-center">
+        <Col sm={10}>
+          <Form.Control 
+            type="text"
+            placeholder="Enter RSS URL"
+            value={rssUrl}
+            onChange={e => setRssUrl(e.target.value)}
+          />
+        </Col>
+        <Col sm={2}>
+          <Button type="submit">Add RSS</Button>
+        </Col>
+      </Form.Row>
+    </Form>
   );
 };
 
@@ -136,7 +160,7 @@ export const RssEditPage = ()=> {
     <div className="rss-wrap">
       <AppNavBar />
       <RssList rsses={rsses} dispatch={dispatch} />
-      <RssForm dispatch={dispatch} />
+      <RssForm dispatch={dispatch} rsses={rsses} />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useContext, useState, createContext, useReducer, useEffect, useR
 import ReactDOM from "react-dom";
 import { Alert, Form, Row, Col, Button, Container, Navbar, Nav, FormControl } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './css/custom.css';
 import { BrowserRouter, useHistory, Switch, Route, Link } from "react-router-dom";
 import SearchArticle from './SearchArticle';
 import { ResultList } from './ResultList';
@@ -25,11 +26,19 @@ export const LoginPage = () => {
   
   const loginButton = state.userName !== undefined ?
     (<Alert variant="warning">You are already logged in!</Alert>) :
-    (<Button href="/auth/twitter">Login with Twitter</Button>);
+    (<Button href="/auth/twitter" className="login-link-button">Login with Twitter</Button>);
     
   return (
     <div>
-      {loginButton}
+      <Row className="blank-row"> </Row>
+      <Row>
+        <Col sm={2}> </Col>
+        <Col sm={8}>{loginButton}</Col>
+        <Col sm={2}> </Col>
+      </Row>
+      <Row>
+        <Link to="/">Back</Link>
+      </Row>
     </div>
   );
 };
@@ -38,7 +47,6 @@ function TopPage() {
   return (
     <div>
       <AppNavBar />
-      <h1>Top</h1>
       <ResultList />
     </div>
   );

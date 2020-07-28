@@ -7,11 +7,6 @@ const htmlWebpackPlugin = new HtmlWebPackPlugin({
   filename: "./index.html"
 });
 
-const htmlWebpackPluginLogin = new HtmlWebPackPlugin({
-  template: "./src/client/login.html",
-  filename: "./login.html"
-});
-
 module.exports = merge({
   entry: "./src/client/index.tsx",
   output: {
@@ -42,7 +37,7 @@ module.exports = merge({
       '.ts', '.js', '.tsx'
     ],
   },
-  plugins: [htmlWebpackPlugin, htmlWebpackPluginLogin]
+  plugins: [htmlWebpackPlugin]
 }, {
   mode: 'development',
   devServer: {
@@ -53,12 +48,12 @@ module.exports = merge({
     port: 8080,
     proxy: {
       '/api/**': {
-        target: 'http://192.168.0.5:3000',
+        target: 'http://192.168.0.7:3000',
         secure: false,
         logLevel: 'debug'
       },
       '/auth/**': {
-        target: 'http://192.168.0.5:3000',
+        target: 'http://192.168.0.7:3000',
         secure: false,
         logLevel: 'debug'
       }

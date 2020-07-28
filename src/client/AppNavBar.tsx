@@ -57,16 +57,23 @@ export const AppNavBar = () => {
   };
   
   const loginOutLink = state.userName !== undefined ?
-    (<Nav.Link onClick={() => handleLogout()}>Logout</Nav.Link>) :
-    (<Nav.Link as={Link} to="/login">Login</Nav.Link>);  
+    (<Nav.Link onClick={() => handleLogout()} style={{display: "inline"}}>Logout</Nav.Link>) :
+    (<Nav.Link as={Link} to="/login" style={{display: "inline"}}>Login</Nav.Link>);  
   
-  console.log(state);
-  
+  //console.log(state);
+  //Navでカレントがactiveにならないのをどうにかしたい
   return (
-    <Navbar>
+    <div>
+    <Navbar bg="light" variant="light">
       <Navbar.Brand as={Link} to='/'>Rep RSS</Navbar.Brand>
-      <Nav.Link as={Link} to='/edit_rss'>Edit RSS</Nav.Link>
-      <Nav>{state.userName !== undefined ? state.userName : ""}</Nav>
-      {loginOutLink}
-    </Navbar>);
+      <Nav className="mr-auto">
+        <Nav.Link as={Link} to='/edit_rss'>Edit RSS</Nav.Link>
+        <Nav.Link as={Link} to='/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6'>(Beta) Update RSS</Nav.Link>
+      </Nav>
+      <div>
+        <Nav style={{display: "inline"}}>{state.userName !== undefined ? state.userName : ""}</Nav>
+        {loginOutLink}
+      </div>
+    </Navbar>
+  </div>);
 }

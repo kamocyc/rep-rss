@@ -2,13 +2,13 @@
 // @ts-ignore
 import Parser, { mockRssParser } from 'rss-parser';
 import { rssArticleJsonToBe, rssArticleJson, tweetJson, tweetJsonToBe } from './data';
-import { database, sequelize } from '../src/server/models/sequelize-loader';
-import { updateRss, convertTweet, getTwitterReputation, getArticles } from '../src/server/fetch_rss';
+import { updateRss, convertTweet, getTwitterReputation, getArticles } from '../../src/server/fetch_rss';
 
-import { User } from '../src/server/models/user';
-import { Rss } from '../src/server/models/rss';
-import { Article } from '../src/server/models/article';
-import { Tweet } from '../src/server/models/tweet';
+import { database } from '../../src/server/models/sequelize-loader';
+import { User } from '../../src/server/models/user';
+import { Rss } from '../../src/server/models/rss';
+import { Article } from '../../src/server/models/article';
+import { Tweet } from '../../src/server/models/tweet';
 
 jest.mock('rss-parser');
 
@@ -34,11 +34,6 @@ beforeEach(async () => {
   });
 });
 
-//NEED THIS WHEN TEST!!!
-afterAll(async () => {
-  await database.close();
-})
-
 const twClient = {
   get: async () => {
     return {
@@ -55,7 +50,7 @@ function equalTweet(res: any, tobe: any) {
   expect(res.twScreenName).toBe(tobe.twScreenName);
   expect(res.twText).toBe(tobe.twText);
   expect(res.twUrl).toBe(tobe.twUrl);
-  expect(res.tweetId).toBe(tobe.tweetId);
+  expect(res.tweetOriginalId).toBe(tobe.tweetOriginalId);
 }
 
 describe("update regular to database", () => {
@@ -66,20 +61,30 @@ describe("update regular to database", () => {
     
     expect(title).toBe("Hacker News: Newest");
     expect(maxPubDate).toStrictEqual(new Date("2020-07-26T21:38:03.000Z"));
+    
+    //article
     const articles = await Article.findAll();
     expect(articles.length).toBe(2);
-    // expect(articles[1]).toStrictEqual({
-    //   articleId: 2,
-    //   rssId: 1,
-    //   link: "https://undark.org/2020/07/23/cracking-down-on-research-fraud",
-    //   title: "Cracking down on research fraud",
-    //   description: "Article URL: https://undark.org/2020/07/23/cracking-down-on-research-fraud Comments URL: https://news.ycombinator.com/item?id=23960387 Points: 256 # Comments: 150",
-    //   enclosure: null,
-    //   pubDate: new Date("2020-07-26T21:38:03.000Z"),
-    //   point: 0,
-    //   count_twitter: 0,
-    //   count_twitter_updated: 0
-    // });
+    const article_2 = await Article.findAll({ where: {title: "Cracking down on research fraud"}});
+    expect(article_2.length).toBe(1);
+    const ar = (article_2[0] as any);
+    
+    expect(ar.rssId).toBe(1);
+    expect(ar.link).toBe("https://undark.org/2020/07/23/cracking-down-on-research-fraud");
+    expect(ar.title).toBe("Cracking down on research fraud");
+    expect(ar.description).toBe("Article URL: https://undark.org/2020/07/23/cracking-down-on-research-fraud Comments URL: https://news.ycombinator.com/item?id=23960387 Points: 256 # Comments: 150");
+    expect(ar.enclosure).toBe(null);
+    expect(ar.pubDate).toStrictEqual(new Date("2020-07-26T21:38:03.000Z"));
+    expect(ar.point).toBe(0);
+    expect(ar.count_twitter).toBe(1);
+    
+    //tweet
+    const tweets = await Tweet.findAll();
+    expect(tweets.length).toBe(2);
+    const tweet_2 = await Tweet.findAll({ where: { articleId: ar.articleId }});
+    const tw = (tweet_2[0] as any);
+    
+    equalTweet(tw, tweetJsonToBe);
   });
 });
 
@@ -89,6 +94,7 @@ describe("tweet_get", () => {
     
     equalTweet(res, tweetJsonToBe);
   });
+  
   
   test("getTwitterReputation", async () => {
     const {tweets, tweetCount} = await getTwitterReputation(twClient as any, "foo");
@@ -105,4 +111,9 @@ describe("tweet_get", () => {
     expect(articles).toStrictEqual(rssArticleJsonToBe);
     expect(title).toBe("Hacker News: Newest");
   });
+});
+
+//NEED THIS WHEN TEST!!!
+afterAll(async () => {
+  await database.close();
 });

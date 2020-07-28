@@ -5,8 +5,12 @@ export const Tweet = database.define(
   'Tweet',
   {
     tweetId: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
+    },
+    tweetOriginalId: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     articleId: {
@@ -29,9 +33,12 @@ export const Tweet = database.define(
       type: DataTypes.TEXT,
       allowNull: false
     },
+    twOriginalText: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
     twUrl: {
       type: DataTypes.STRING,
-      allowNull: false
     }
   }
 );

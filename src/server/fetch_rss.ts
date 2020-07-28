@@ -4,6 +4,7 @@ import { Rss } from './models/rss';
 import Parser from 'rss-parser';
 import Twitter from 'twitter-lite';
 import striptags from 'striptags';
+import { ProcessTweetsMain, TweetType } from './process_tweet';
 
 //articleの最大長
 const ARTICLE_BODY_MAX = 255;
@@ -24,15 +25,6 @@ interface ArticleType {
   pubDate: Date;
 }
 
-interface TweetType {
-  tweetId: string,
-  twScreenName: string,
-  twName: string,
-  twDate: Date,
-  twText: string,
-  twUrl: string,
-}
-
 type RssType = {
   rssId: number,
   url: string,
@@ -40,15 +32,12 @@ type RssType = {
 };
 
 export async function updateAll(userToken: UserToken) {
-  console.log("a");
+  //console.log("a");
   console.log({userToken: userToken});
   //TODO: ログインと連携させる
   const twClient = new Twitter(userToken);
-  console.log("b");
   const rsses: any[] = await Rss.findAll() as any;
-  console.log("c");
   await Promise.all(rsses.map(async (rss) => {
-    console.log("d");
     console.log({rss: rss});
     const { title, maxPubDate } = await updateRss(rss, twClient);
     console.log({ title, maxPubDate, rssId: rss.rssId });
@@ -65,6 +54,7 @@ export async function updateAll(userToken: UserToken) {
       }
     );
   }));
+  
 }
 
 export async function updateRss(rss: RssType, twClient: Twitter) {
@@ -75,8 +65,7 @@ export async function updateRss(rss: RssType, twClient: Twitter) {
   
   await Promise.all(createdArticles.map(async (article) => {
     try {
-      const {tweets, tweetCount} = await getTwitterReputation(twClient, article.link);
-    
+      const {tweets, tweetCount} = await getTwitterReputation(twClient, article.link, article.articleTitle);
       console.log({tweets, tweetCount});
       
       //insert
@@ -85,10 +74,12 @@ export async function updateRss(rss: RssType, twClient: Twitter) {
       await Tweet.bulkCreate(tweetsToInsert);
       
       //tweet数を更新
+      //pointはいったん単純なtweet countにする
       await Article.update(
         {
           count_twitter_updated: updateDate,
-          count_twitter: tweetCount
+          count_twitter: tweetCount,
+          point: tweetCount,
         }, {
           where: {
             articleId: article.articleId
@@ -105,44 +96,23 @@ export async function updateRss(rss: RssType, twClient: Twitter) {
   return { title, maxPubDate };
 }
 
-// function dictToParam(dict: { [key: string]: string }): string {
-//   let params = [];
-//   for(const [k, v] of Object.entries(dict)) {
-//     params.push(k + "=" + v);
-//   }
-  
-//   return '?' + params.join('&');
-// }
-
-export function convertTweet(status: any): TweetType {
-  return {
-    tweetId: status.id_str,
-    twScreenName: status.user.screen_name,
-    twName: status.user.name,
-    twDate: new Date(status.created_at),
-    twText: status.text,
-    twUrl: status.entities.urls[0].url,
-  } as TweetType;  
-}
-
-export async function getTwitterReputation(twClient: Twitter, queryString: string): Promise<{tweets: TweetType[], tweetCount: number}> {
+export async function getTwitterReputation(twClient: Twitter, queryString: string, articleTitle: string): Promise<{tweets: TweetType[], tweetCount: number}> {
   const params = {
     q: queryString,
     // result_type: 'mixed', //
     count: "100",
+    tweet_mode: "extended",
   };
   
-  console.log({ params: params });
   try {
     const results = await twClient.get("search/tweets", params);
     console.log({ results: results });
-    const tweets = results.statuses.map((status: any) => convertTweet(status));
     
-    //TODO: 検索結果が多い時に複数回取得
+    const processed = ProcessTweetsMain(results, articleTitle);
     
     return {
-      tweets: tweets,
-      tweetCount: tweets.length
+      tweets: processed.tweets,
+      tweetCount: processed.tweetCount
     };
   } catch (e) {
     console.log({"error": e});
@@ -165,6 +135,7 @@ async function updateArticles(rss: RssType): Promise<{
     createdArticles: {
       articleId: any;
       link: string;
+      articleTitle: string;
     }[]}> {
   const {articles, title} = await getArticles(rss.url);
   
@@ -182,7 +153,7 @@ async function updateArticles(rss: RssType): Promise<{
       pubDate: article.pubDate
     });
     
-    return {articleId: (created as any).articleId, link: article.link};
+    return {articleId: (created as any).articleId, link: article.link, articleTitle: article.title ?? ""};
   }));
   
   let maxPubDate = rss.maxPubDate !== undefined ? rss.maxPubDate : new Date('1980-01-01');

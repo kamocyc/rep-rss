@@ -1,0 +1,33 @@
+.link-in-list {
+  font-size: 80%;
+  color: #888;
+  word-wrap: break-word;
+}
+
+.link-in-list > a {
+  color: #888;
+}
+
+.article-point {
+  text-align: center;
+}
+
+.rss-row {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+.blank-row {
+  height: 50px;
+}
+
+.login-link-button {
+  display: block;
+}
+
+.comment-row {
+  margin-top: 3px;
+  margin-bottom: 3px;
+  border: solid 2px #fc9;
+}
+

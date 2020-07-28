@@ -92,7 +92,7 @@ export const tweetJsonToBe = {
   twScreenName: "exaday",
   twText: "It's time to get serious about research fraud https://t.co/sTQh7PoBiW",
   twUrl: "https://t.co/sTQh7PoBiW",
-  tweetId: "1287615283595825152",
+  tweetOriginalId: "1287615283595825152",
 };
 
 export const rssArticleJson = { items:
