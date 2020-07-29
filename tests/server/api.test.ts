@@ -7,10 +7,10 @@ import { app } from '../../src/server/server_app';
 
 import { database } from '../../src/server/models/sequelize-loader';
 
-import { User } from '../../src/server/models/user';
-import { Rss } from '../../src/server/models/rss';
-import { Article } from '../../src/server/models/article';
-import { Tweet } from '../../src/server/models/tweet';
+import User from '../../src/server/models/user';
+import Rss from '../../src/server/models/rss';
+import Article from '../../src/server/models/article';
+import Tweet from '../../src/server/models/tweet';
 
 beforeEach(async () => { 
   (Parser as any).mockClear();
@@ -35,7 +35,7 @@ beforeEach(async () => {
 });
 
 describe('article list', () => {
-  test("/api/get_list", (done) => {
+  test("/api/article_get", (done) => {
     //set up
     Article.create({
       aritcleId: 1,
@@ -46,7 +46,7 @@ describe('article list', () => {
       pubDate: new Date("2020-01-01"),
     }).then(() => {
       request(app)
-      .get("/api/get_list")
+      .get("/api/article_get")
       .expect(200, { articles: [{
         articleId: 1,
         link: "http://example.com/a1",
@@ -56,7 +56,7 @@ describe('article list', () => {
     });
   });
   
-  test("/api/comment_list", (done) => {
+  test("/api/comment_get", (done) => {
     Promise.all([
       Article.create({
         aritcleId: 1,
@@ -98,7 +98,7 @@ describe('article list', () => {
         })]
       ).then(() => {
         request(app)
-        .get("/api/comment_list?articleId=" + 1)
+        .get("/api/comment_get?articleId=" + 1)
         .expect(200, {
           comments: [{
             commentId: 'tw_123456789',
@@ -107,7 +107,13 @@ describe('article list', () => {
             name: "aa",
             text: "cc",
             twUrl: "dd",
-          }]
+          }],
+          article: {
+            title: "foo article",
+            link: "http://example.com/a1",
+            point: 10,
+            articleId: 1,
+          }
         }, done);
       });
     })

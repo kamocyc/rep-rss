@@ -1,7 +1,7 @@
-import React, { useContext, useState, createContext, useReducer, useEffect, useRef } from "react";
-import { Alert, Form, Row, Col, Button, Container, Navbar, Nav, FormControl } from 'react-bootstrap';
-import { BrowserRouter, useHistory, Switch, Route, Link } from "react-router-dom";
-import { LoginContextProvider, LoginContext } from './login-context';
+import React, { useContext, useEffect } from "react";
+import { Nav, Navbar } from 'react-bootstrap';
+import { Link } from "react-router-dom";
+import { LoginContext } from './login-context';
 
 export const AppNavBar = () => {
   const {state, dispatch} = useContext(LoginContext);
@@ -30,7 +30,7 @@ export const AppNavBar = () => {
       }
     })
     .catch(error => {
-      console.log("ERR");
+      console.log({"ERR": error});
     });
   }, []);
   
@@ -51,7 +51,7 @@ export const AppNavBar = () => {
       }
     })
     .catch(error => {
-      console.log("ERR2");
+      console.log({"ERR2": error});
     });
     
   };

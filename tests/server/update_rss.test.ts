@@ -5,10 +5,10 @@ import { rssArticleJsonToBe, rssArticleJson, tweetJson, tweetJsonToBe } from './
 import { updateRss, convertTweet, getTwitterReputation, getArticles } from '../../src/server/fetch_rss';
 
 import { database } from '../../src/server/models/sequelize-loader';
-import { User } from '../../src/server/models/user';
-import { Rss } from '../../src/server/models/rss';
-import { Article } from '../../src/server/models/article';
-import { Tweet } from '../../src/server/models/tweet';
+import User from '../../src/server/models/user';
+import Rss from '../../src/server/models/rss';
+import Article from '../../src/server/models/article';
+import Tweet from '../../src/server/models/tweet';
 
 jest.mock('rss-parser');
 
@@ -57,7 +57,7 @@ describe("update regular to database", () => {
   test("update", async () => {
     const rss = await Rss.findAll({where: {rssId: 1}});
 
-    const {title, maxPubDate} = await updateRss(rss[0] as any, twClient as any);
+    const {title, maxPubDate} = await updateRss(rss[0], twClient as any);
     
     expect(title).toBe("Hacker News: Newest");
     expect(maxPubDate).toStrictEqual(new Date("2020-07-26T21:38:03.000Z"));
@@ -67,7 +67,7 @@ describe("update regular to database", () => {
     expect(articles.length).toBe(2);
     const article_2 = await Article.findAll({ where: {title: "Cracking down on research fraud"}});
     expect(article_2.length).toBe(1);
-    const ar = (article_2[0] as any);
+    const ar = article_2[0];
     
     expect(ar.rssId).toBe(1);
     expect(ar.link).toBe("https://undark.org/2020/07/23/cracking-down-on-research-fraud");
@@ -82,7 +82,7 @@ describe("update regular to database", () => {
     const tweets = await Tweet.findAll();
     expect(tweets.length).toBe(2);
     const tweet_2 = await Tweet.findAll({ where: { articleId: ar.articleId }});
-    const tw = (tweet_2[0] as any);
+    const tw = tweet_2[0];
     
     equalTweet(tw, tweetJsonToBe);
   });

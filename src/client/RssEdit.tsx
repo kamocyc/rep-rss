@@ -1,6 +1,6 @@
-import React, { useContext, useState, createContext, useReducer, useEffect, useRef } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
+import { Button, Col, Form, Row } from "react-bootstrap";
 import { AppNavBar } from './AppNavBar';
-import { Row, Col, Form, Button } from "react-bootstrap";
 
 type Rss = {
   url: string 
@@ -28,13 +28,15 @@ const rssReducer: RssResucerType = (rsses, action) => {
         url: action.url as string,
       }] as Rss[]);
     case 'REMOVE_RSS':
-      const newRsses = [];
-      for(let i=0; i<rsses.length; i++) {
-        if(action.index !== i) {
-          newRsses.push(rsses[i]);
+      {
+        const newRsses = [];
+        for(let i=0; i<rsses.length; i++) {
+          if(action.index !== i) {
+            newRsses.push(rsses[i]);
+          }
         }
+        return newRsses;
       }
-      return newRsses;
     default:
       throw Error("illegal action type: " + action.type);
       return [...rsses];
@@ -108,7 +110,7 @@ const RssList = ({ rsses, dispatch }: { rsses: Rss[], dispatch: React.Dispatch<R
 //TODO: サーバサイドでちゃんとした検査を実装
 //URLの簡易検査
 function isUrlLike(text: string) {
-  const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/im;
+  const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/im;
   
   return text.match(replacePattern1) !== null;
 }

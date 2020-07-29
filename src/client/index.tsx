@@ -1,15 +1,15 @@
-import React, { useContext, useState, createContext, useReducer, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
-import { Alert, Form, Row, Col, Button, Container, Navbar, Nav, FormControl } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/custom.css';
-import { BrowserRouter, useHistory, Switch, Route, Link } from "react-router-dom";
-import SearchArticle from './SearchArticle';
-import { ResultList } from './ResultList';
-import { CommentList } from './ArticleComment';
-import { RssEditPage } from './RssEdit';
+import React, { useContext } from "react";
+import { Alert, Button, Col, Container, Row } from 'react-bootstrap';
+import ReactDOM from "react-dom";
+import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import { AppNavBar } from './AppNavBar';
-import { LoginContextProvider, LoginContext } from './login-context';
+import { CommentList } from './ArticleComment';
+import './css/custom.css';
+import { LoginContext, LoginContextProvider } from './login-context';
+import { ResultList } from './ResultList';
+import { RssEditPage } from './RssEdit';
+import { SearchArticle } from './SearchArticle';
 
 function SearchPage() {
   return (
@@ -22,7 +22,7 @@ function SearchPage() {
 }
 
 export const LoginPage = () => {
-  const {state, dispatch} = useContext(LoginContext);
+  const { state } = useContext(LoginContext);
   
   const loginButton = state.userName !== undefined ?
     (<Alert variant="warning">You are already logged in!</Alert>) :

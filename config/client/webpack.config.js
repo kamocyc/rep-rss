@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const path = require('path')
 const { merge } = require('webpack-merge');
@@ -11,7 +12,8 @@ module.exports = merge({
   entry: "./src/client/index.tsx",
   output: {
     path: path.resolve('dist/client'),
-    filename: '[name].js'
+    filename: '[name].js',
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -24,7 +26,7 @@ module.exports = merge({
         exclude: /node_modules/,
         use: {
           loader: "babel-loader"
-        }
+        },
       },
       {
         test: /\.css$/,
@@ -48,12 +50,12 @@ module.exports = merge({
     port: 8080,
     proxy: {
       '/api/**': {
-        target: 'http://192.168.0.7:3000',
+        target: 'http://192.168.0.13:3000',
         secure: false,
         logLevel: 'debug'
       },
       '/auth/**': {
-        target: 'http://192.168.0.7:3000',
+        target: 'http://192.168.0.13:3000',
         secure: false,
         logLevel: 'debug'
       }

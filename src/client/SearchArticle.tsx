@@ -1,43 +1,29 @@
-import React from "react";
-import { Form, Row, Col, Button, Container, Navbar, Nav, FormControl } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Button, Col, Form, FormControl, Row } from 'react-bootstrap';
 
-interface SearchArticleProps {}
-interface SearchArticleStates {
-  query: string  
-}
-
-class SearchArticle extends React.Component<SearchArticleProps, SearchArticleStates> {
-  constructor(props: SearchArticleProps) {
-    super(props);
-    
-    this.state = {
-      query: ""  
-    };
-  }
+export const SearchArticle = () => {
+  const [ query, setQuery ] = useState("");
   
-  handleSubmit = (e: React.FormEvent<HTMLElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLElement>) => {
     e.preventDefault();
     
-    alert(this.state.query);
+    alert(query);
   }
   
-  handleChange = (e: React.ChangeEvent<typeof FormControl & HTMLInputElement>) => {
-    this.setState({query: e.target.value});
+  const handleChange = (e: React.ChangeEvent<typeof FormControl & HTMLInputElement>) => {
+    setQuery(e.target.value);
   }
   
-  render() {
-    return (
-      <Form onSubmit={this.handleSubmit} inline>
-        <Form.Group as={Row} controlId="searchControlGroup">
-          <Col sm={10}>
-            <Form.Control type="text" placeholder="search keywords" value={this.state.query} onChange={this.handleChange} />
-          </Col>
-          <Col sm={2}>
-            <Button type="submit">Search</Button>
-          </Col>
-        </Form.Group>
-      </Form>);
-  }
-}
+  return (
+    <Form onSubmit={handleSubmit} inline>
+      <Form.Group as={Row} controlId="searchControlGroup">
+        <Col sm={10}>
+          <Form.Control type="text" placeholder="search keywords" value={query} onChange={handleChange} />
+        </Col>
+        <Col sm={2}>
+          <Button type="submit">Search</Button>
+        </Col>
+      </Form.Group>
+    </Form>);
+};
 
-export default SearchArticle;

@@ -1,8 +1,8 @@
 
-import { User } from '../../src/server/models/user';
-import { Rss } from '../../src/server/models/rss';
-import { Article } from '../../src/server/models/article';
-import { Tweet } from '../../src/server/models/tweet';
+import User from '../../src/server/models/user';
+import Rss from '../../src/server/models/rss';
+import Article from '../../src/server/models/article';
+import Tweet from '../../src/server/models/tweet';
 import { database } from '../../src/server/models/sequelize-loader';
 
 const users = [

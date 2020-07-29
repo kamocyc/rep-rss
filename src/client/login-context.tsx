@@ -1,7 +1,11 @@
-import React, { createContext, useReducer, Dispatch } from "react";
+import React, { createContext, Dispatch, useReducer } from "react";
 
 interface LoginContextType {
   userName?: string;
+}
+interface LoginAction {
+  type: string;
+  payload: string | undefined;
 }
 
 const initState: LoginContextType = {
@@ -10,13 +14,13 @@ const initState: LoginContextType = {
 
 export const LoginContext = createContext<{
   state: LoginContextType;
-  dispatch: Dispatch<any>;
+  dispatch: Dispatch<LoginAction>;
 }>({
   state: initState,
   dispatch: () => null
 });
 
-const reducer = (state: any, action: any): { userName?: string } => {
+const reducer = (state: LoginContextType, action: LoginAction): { userName?: string } => {
   switch (action.type) {
     case "SET_LOGIN":
       return {

@@ -10,6 +10,12 @@
 
 .article-point {
   text-align: center;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.article-comment-count {
+  margin-bottom: 4px;
 }
 
 .rss-row {
@@ -31,3 +37,22 @@
   border: solid 2px #fc9;
 }
 
+.tweet-display-name {
+  font-size: 90%;
+  text-decoration: underline; 
+  margin-right: 5px;
+  color: #555;
+}
+
+.tweet-id-name > a:link,
+.tweet-id-name > a:visited,
+.tweet-id-name > a:hover,
+.tweet-id-name > a:active {
+  font-size: 90%;
+  margin-right: 5px;
+  color: #aaa;
+}
+
+.tweet-time > a:link {
+  font-size: 90%; 
+}
