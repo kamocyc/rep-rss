@@ -1,14 +1,14 @@
 
 // @ts-ignore
 import Parser, { mockRssParser } from 'rss-parser';
-import { rssArticleJsonToBe, rssArticleJson, tweetJson, tweetJsonToBe } from './data';
-import { updateRss, convertTweet, getTwitterReputation, getArticles } from '../../src/server/fetch_rss';
-
-import { database } from '../../src/server/models/sequelize-loader';
-import User from '../../src/server/models/user';
-import Rss from '../../src/server/models/rss';
+import { getArticles, getTwitterReputation, updateRss } from '../../src/server/fetch_rss';
 import Article from '../../src/server/models/article';
+import Rss from '../../src/server/models/rss';
+import { database } from '../../src/server/models/sequelize-loader';
 import Tweet from '../../src/server/models/tweet';
+import User from '../../src/server/models/user';
+import { rssArticleJsonToBe, tweetJson, tweetJsonToBe } from './data';
+
 
 jest.mock('rss-parser');
 
@@ -89,15 +89,9 @@ describe("update regular to database", () => {
 });
 
 describe("tweet_get", () => {
-  test("convertTweetの結果が正しい", () => {
-    const res = convertTweet(tweetJson);
-    
-    equalTweet(res, tweetJsonToBe);
-  });
-  
   
   test("getTwitterReputation", async () => {
-    const {tweets, tweetCount} = await getTwitterReputation(twClient as any, "foo");
+    const {tweets, tweetCount} = await getTwitterReputation(twClient as any, "foo", "bar_article", undefined);
     
     expect(tweetCount).toBe(1);
     

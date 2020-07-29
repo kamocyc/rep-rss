@@ -8,6 +8,14 @@
   color: #888;
 }
 
+.point-col {
+  height: 20px;
+}
+
+.article-title {
+  margin-bottom: 0px;
+}
+
 .article-point {
   text-align: center;
   font-weight: bold;
@@ -37,7 +45,10 @@
   border: solid 2px #fc9;
 }
 
-.tweet-display-name {
+.tweet-display-name > a:link,
+.tweet-display-name > a:visited,
+.tweet-display-name > a:hover,
+.tweet-display-name > a:active {
   font-size: 90%;
   text-decoration: underline; 
   margin-right: 5px;

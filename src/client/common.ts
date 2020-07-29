@@ -2,7 +2,7 @@
 export type CommentType = {
   text: string,
   articleId: number,
-  date: Date,
+  date: string,
   name: string,
   commentId: number,
   twUrl: string,
@@ -20,7 +20,7 @@ export type ArticleType = {
   calculatedPoint: number,
   count_twitter_updated: number,
   description: string,
-  pubDate: Date,
+  pubDate: string,
   rssId: number,
 };
 
@@ -41,16 +41,16 @@ export function getReadableInterval(date1: Date, date2: Date): string {
   
   const intervalSec = (date1.getTime() - date2.getTime()) / 1000;
   if(intervalSec < 60) {
-    return Math.round(intervalSec) + toPlural(intervalSec, suffices.second);
+    return Math.round(intervalSec) + " " + toPlural(intervalSec, suffices.second);
   }
-
+  
   if(intervalSec / 60 < 60) {
-    return Math.round(intervalSec / 60) + toPlural(intervalSec, suffices.minute);
+    return Math.round(intervalSec / 60) + " " + toPlural(intervalSec, suffices.minute);
   }
   
   if(intervalSec / 60 / 60 < 24) {
-    return Math.round(intervalSec / 60 / 60) + toPlural(intervalSec, suffices.hour);
+    return Math.round(intervalSec / 60 / 60) + " " + toPlural(intervalSec, suffices.hour);
   }
   
-  return Math.round(intervalSec / 60 / 60 / 24) + toPlural(intervalSec, suffices.day);
+  return Math.round(intervalSec / 60 / 60 / 24) + " " + toPlural(intervalSec, suffices.day);
 }

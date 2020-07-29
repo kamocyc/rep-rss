@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Row, Col, Container } from "react-bootstrap";
-import { AppNavBar } from './AppNavBar';
+import React, { useEffect, useState } from "react";
+import { Container, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
-import { CommentType, ArticleType, getReadableInterval } from './common';
+import { AppNavBar } from './AppNavBar';
 import { ArticleItem } from './ArticleItem';
+import { ArticleType, CommentType, getReadableInterval } from './common';
 
 function getTweetUrl(userScreenName: string, tweetId: string): string {
   return "https://twitter.com/" + userScreenName + "/status/" + tweetId;
@@ -20,7 +20,7 @@ const Comment = ({ comment } : { index: number, comment: CommentType }) => {
     <Row className="comment-row">
       <Container>
         <Row>
-          <span className="tweet-display-name">{comment.name}</span>
+          <span className="tweet-display-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{comment.name}</a></span>
           <span className="tweet-id-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{"@" + comment.twScreenName}</a></span>
           <span className="tweet-time"><a href={getTweetUrl(comment.twScreenName, comment.tweetOriginalId)}>{elapsed}</a></span>
         </Row>
@@ -44,15 +44,16 @@ export const CommentList = () => {
     calculatedPoint: 0,
     count_twitter_updated: 0,
     description: "",
-    pubDate: new Date(),
+    pubDate: (new Date()).toString(),
     rssId: 1,
   });
   
   useEffect(() => {
     fetch(commentApiEndpoint + '?articleId=' + articleId)
     .then(res => res.json())
-    .then(list => {
+    .then((list : { comments: CommentType[], article: ArticleType }) => {
       console.log(list);
+      list.comments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setComments(list.comments);
       setArticle(list.article);
     });

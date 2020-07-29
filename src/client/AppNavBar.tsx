@@ -57,7 +57,7 @@ export const AppNavBar = () => {
   };
   
   const loginOutLink = state.userName !== undefined ?
-    (<Nav.Link onClick={() => handleLogout()} style={{display: "inline"}}>Logout</Nav.Link>) :
+    (<Nav.Link onClick={() => handleLogout()} style={{display: "inline", wordBreak: 'break-all'}}>Logout</Nav.Link>) :
     (<Nav.Link as={Link} to="/login" style={{display: "inline"}}>Login</Nav.Link>);  
   
   //console.log(state);
@@ -71,7 +71,7 @@ export const AppNavBar = () => {
         <Nav.Link as={Link} to='/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6'>(Beta) Update RSS</Nav.Link>
       </Nav>
       <div>
-        <Nav style={{display: "inline"}}>{state.userName !== undefined ? state.userName : ""}</Nav>
+        <Nav style={{display: "inline", wordBreak: 'break-all'}}>{state.userName !== undefined ? state.userName : ""}</Nav>
         {loginOutLink}
       </div>
     </Navbar>

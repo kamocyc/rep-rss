@@ -1,16 +1,12 @@
 import { Express } from 'express';
 import { Op, Sequelize } from 'sequelize';
-import { LoginUser } from './common';
+import { LoginUser, flatten } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import User from './models/user';
 // import { sequelize, database } from './models/sequelize-loader';
 
 //user rss article 
-
-function flatten<T>(arr: T[][]): T[] {
-  return ([] as T[]).concat.apply([], arr);
-}
 
 export function registerArticle(app: Express) {
   app.get('/api/article_get',

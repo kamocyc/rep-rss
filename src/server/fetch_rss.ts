@@ -1,19 +1,23 @@
 import Parser from 'rss-parser';
 import striptags from 'striptags';
-import { Status as TweetStatus } from 'twitter-d';
 import Twitter from 'twitter-lite';
+import { Op, Sequelize } from 'sequelize';
+
+import { flatten } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import Tweet from './models/tweet';
+import User from './models/user';
 import { ProcessTweetsMain, TweetType } from './process_tweet';
+import { searchAllTweets, QuerySetting, SearchApiStatus } from './twitter_api';
+import { consumerKey, consumerSecret } from './secure_token';
 
 //articleの最大長
 const ARTICLE_BODY_MAX = 255;
-const rssParser = new Parser();
+//1記事あたりのAPI使用回数上限
+const MAX_API_COUNT = 20;
 
-type TweetObject = {
-  statuses: TweetStatus[];  
-};
+const rssParser = new Parser();
 
 export interface UserToken {
   consumer_key: string;
@@ -36,15 +40,119 @@ type RssType = {
   maxPubDate: Date 
 };
 
-export async function updateAll(userToken: UserToken) {
-  console.log({userToken: userToken});
-  //TODO: ログインと連携させる
+function aggreagateStatuses(statuses: SearchApiStatus[]): SearchApiStatus {
+  return statuses.filter(r => r === 'error').length > 0 ? 'error' :
+            (statuses.filter(r => r === 'rate_limit').length > 0 ? 'rate_limit' : 'ok')
+}
+
+async function getUserAndToken(userId: string, options: any) {
+  const user = await User.findByPk(userId, options);
+  if(user === null) {
+    return {
+      status: 'not_logged_in',
+    };
+  }
+  if(user.oauthToken === null || user.oauthTokenSecret === null) {
+    // Illegal
+    return {
+      status: 'not_logged_in',
+    };
+  }
+  
+  const userToken: UserToken = {
+    consumer_key: consumerKey,
+    consumer_secret: consumerSecret,
+    access_token_key: user.oauthToken,
+    access_token_secret: user.oauthTokenSecret,
+  };
+  
+  return { user, userToken, status: 'ok' };
+}
+
+export async function updateAll(userId: string) {
+  const { user, userToken, status } = await getUserAndToken(userId, {
+    include: [
+      {
+        model: Rss,
+        separate: false,
+      }
+    ]
+  });
+  // console.log({userToken: userToken});
+  
+  if(userToken === undefined) {
+    return {
+      status: status
+    };
+  }
+  
   const twClient = new Twitter(userToken);
-  const rsses = await Rss.findAll();
-  await Promise.all(rsses.map(async (rss) => {
-    console.log({rss: rss});
-    const { title, maxPubDate } = await updateRss(rss, twClient);
-    console.log({ title, maxPubDate, rssId: rss.rssId });
+  
+  const rsses = (user as any).Rsses as Rss[];
+  
+  const result = await updateRsses(twClient, rsses);
+  
+  return result;
+}
+
+function subtractDays(date_: Date, days: number): Date {
+  const date = new Date(date_);
+  date.setDate(date.getDate() - days);
+  return date;
+}
+
+function subtractMinutes(date_: Date, minutes: number): Date {
+  const date = new Date(date_);
+  date.setMinutes(date.getMinutes() - minutes);
+  return date;
+}
+
+export async function updateTweetsEntry(userId: string, pointLowerBound: number, sinceDayMinus: number, lastElapsed: number) {
+  const nowDate = new Date();
+  
+  //既にある記事で、ポイントが多くて(10以上)、今から1日以内、最後に更新してから30分以上経ったものを更新対象とする。
+  const { user, userToken } = await getUserAndToken(userId, {
+    include: [
+      {
+        model: Rss,
+        separate: false,
+        include: [
+          {
+            model: Article,
+            separate: false,
+            where: { [Op.and]: [
+              { point: { [Op.gte]: pointLowerBound } },
+              { pubDate: { [Op.gte]: subtractDays(nowDate, sinceDayMinus) } },
+              { count_twitter_updated: { [Op.lt]: subtractMinutes(nowDate, lastElapsed) } },
+            ]},
+          }
+        ]
+      }
+    ]
+  });
+  
+  if(userToken === undefined) {
+    return {
+      status: status
+    };
+  }
+  
+  const twClient = new Twitter(userToken);
+  
+  const articles = flatten(((user as any).Rsses as Rss[]).map(r => (r as any).Articles as Article[]));
+  
+  console.log({UPDATE_ARTICLES: articles});
+  
+  const result = await updateTweets(twClient, articles);
+  
+  return result;
+}
+
+async function updateRsses(twClient: Twitter, rsses: Rss[]) {
+  const statuses = await Promise.all(rsses.map(async (rss) => {
+    // console.log({rss: rss});
+    const { title, maxPubDate, status } = await updateRss(rss, twClient);
+    // console.log({ title, maxPubDate, rssId: rss.rssId });
     
     await Rss.update(
       {
@@ -57,20 +165,73 @@ export async function updateAll(userToken: UserToken) {
         }
       }
     );
+    
+    return { status };
   }));
   
+  // console.log({"agg": aggreagateStatuses(statuses.map(s => s.status))});
+  
+  return aggreagateStatuses(statuses.map(s => s.status));
+}
+
+async function updateTweets(twClient: Twitter, articles: Article[]) {
+  const updateDate = new Date();
+  
+  const results = await Promise.all(articles.map(async (article) => {
+    const qSet: QuerySetting = {
+      queryString: article.link,
+      since: article.count_twitter_updated === null ? undefined : article.count_twitter_updated,
+      maxApiCount: MAX_API_COUNT,
+    };
+    
+    const {tweets, tweetCount, status} = await getTwitterReputation(twClient, qSet, article.title ?? "{{DUMMY}}");
+    
+    //insert
+    const tweetsToInsert = tweets.map(t => ({...t, articleId: article.articleId}));
+    
+    await Tweet.bulkCreate(tweetsToInsert);
+    
+    //tweet数を更新
+    //pointはいったん単純なtweet countにする
+    await Article.update(
+      {
+        count_twitter_updated: updateDate,
+        count_twitter: tweetCount + (article.count_twitter === null ? 0 : article.count_twitter),
+        point: tweetCount + (article.count_twitter === null ? 0 : article.count_twitter),
+      }, {
+        where: {
+          articleId: article.articleId
+        }
+      });
+    
+    return { tweetCount, status };
+  }));
+  
+  return {
+    status: aggreagateStatuses(results.map(r => r.status))
+  };
 }
 
 //TODO: tweet検索でのsinceを実装
-export async function updateRss(rss: RssType, twClient: Twitter) {
+export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
+  title: string;
+  maxPubDate: Date;
+  status: SearchApiStatus
+}> {
   //キューに貯めるとかしたほうがいい？ => しかし、実装が大変。。。いったん、何も考えずに実装！
   //
   const {title, maxPubDate, createdArticles} = await updateArticles(rss);
   const updateDate = new Date();
   
-  await Promise.all(createdArticles.map(async (article) => {
+  const results = await Promise.all(createdArticles.map(async (article) => {
     try {
-      const {tweets, tweetCount} = await getTwitterReputation(twClient, article.link, article.articleTitle, undefined);
+      const qSet: QuerySetting = {
+        queryString: article.link,
+        since: undefined,
+        maxApiCount: MAX_API_COUNT,
+      };
+      
+      const {tweets, tweetCount, status} = await getTwitterReputation(twClient, qSet, article.articleTitle);
       
       //insert
       const tweetsToInsert = tweets.map(t => ({...t, articleId: article.articleId}));
@@ -90,107 +251,32 @@ export async function updateRss(rss: RssType, twClient: Twitter) {
           }
         });
       
-      return tweetCount;
+      return { tweetCount, status };
     } catch(error) {
       console.error(error);
-      return -1;
+      return { tweetCount: -1, status: ('error' as SearchApiStatus) };
     }
   }));
   
-  return { title, maxPubDate };
+  return { title, maxPubDate,
+    status: aggreagateStatuses(results.map(r => r.status))
+  };
 }
 
-function getMin<T, U>(arr: T[], fn: (v: T) => U): T {
-  if(arr.length === 0) {
-    throw new Error("getMin: should contain more than one element");
-  }
+export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting, articleTitle: string): Promise<{ status: SearchApiStatus, tweets: TweetType[], tweetCount: number }> {
+  const { status, tweets } = await searchAllTweets(qSet, twClient);
   
-  let minval = fn(arr[0]);
-  let minelm = arr[0]
-  for(let i=1; i<arr.length; i++) {
-    if(minval > fn(arr[i])) {
-      minval = fn(arr[i]);
-      minelm = arr[i];
-    }
-  }
+  console.log({TT: {status, tweets }});
+    
+  const processed = ProcessTweetsMain(tweets, articleTitle);
   
-  return minelm;
-}
-
-function formatDate(date: Date): string {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  let month = '' + (d.getMonth() + 1);
-  let day = '' + d.getDate();
-
-  if (month.length < 2) 
-    month = '0' + month;
-  if (day.length < 2) 
-    day = '0' + day;
-
-  return [year, month, day].join('-');
-}
-
-async function searchAllTweets(queryString: string, twClient: Twitter,  since: Date | undefined): Promise<TweetStatus[]> {
-  let allResults: TweetStatus[] = [];
+  console.log({processed: processed});
   
-  let minId: string | undefined = undefined;
-  
-  for (;;) {
-    const params: { [k: string]: string } = {
-      q: queryString,
-      // result_type: 'mixed', //
-      count: "100",
-      tweet_mode: "extended",
-    };
-    
-    if(minId !== undefined) {
-      params.max_id = minId;
-    }
-    
-    if(since !== undefined) {
-      params.q = params.q + " since:" + formatDate(since);
-    }
-    
-    const results = (await twClient.get("search/tweets", params)) as TweetObject;
-    
-    if(results.statuses.length < 100) break;
-    
-    if(minId !== undefined) {
-      //2つ取っている分を消す
-      allResults = allResults.concat(results.statuses.filter(r => r.id_str !== minId));
-    } else {
-      allResults = allResults.concat(results.statuses);
-    }
-  
-    minId = getMin(results.statuses, r => r.id_str).id_str;
-  }
-  
-  return allResults;
-}
-
-export async function getTwitterReputation(twClient: Twitter, queryString: string, articleTitle: string, since: Date | undefined): Promise<{tweets: TweetType[], tweetCount: number}> {
-  try {
-    const results = await searchAllTweets(queryString, twClient, since);
-    const processed = ProcessTweetsMain(results, articleTitle);
-    
-    return {
-      tweets: processed.tweets,
-      tweetCount: processed.tweetCount
-    };
-  } catch (e) {
-    console.log({"error": e});
-    if ('errors' in e) {
-      if(e.errors[0].code == 88) {
-        console.log("Rate limit will reset on", new Date(e._headers.get("x-rate-limit-reset") * 1000));
-      }
-    }
-    
-    return {
-      tweets: [],
-      tweetCount: 0
-    };
-  }
+  return {
+    status: status,
+    tweets: processed.tweets,
+    tweetCount: processed.tweetCount
+  };
 }
 
 async function updateArticles(rss: RssType): Promise<{
@@ -203,7 +289,7 @@ async function updateArticles(rss: RssType): Promise<{
     }[]}> {
   const {articles, title} = await getArticles(rss.url);
   
-  console.log({articles_0: articles.length > 0 ? articles[0] : "", title});
+  // console.log({articles_0: articles.length > 0 ? articles[0] : "", title});
   
   //最終更新日以降のものを追加
   const createdArticles = await Promise.all(articles.filter(a => rss.maxPubDate === undefined || a.pubDate > rss.maxPubDate).map(async function (article) {

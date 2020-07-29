@@ -1,3 +1,4 @@
+
 export const tweetJson = 
   { created_at: 'Mon Jul 27 05:06:21 +0000 2020',
     id: 1287615283595825200,
@@ -89,8 +90,10 @@ export const tweetJson =
 export const tweetJsonToBe = {
   twDate: new Date('2020-07-27T05:06:21.000Z'),
   twName: "Exaday",
+  twProfileImage: "https://abs.twimg.com/images/themes/theme1/bg.png",
+  twOriginalText: "It's time to get serious about research fraud https://t.co/sTQh7PoBiW",
   twScreenName: "exaday",
-  twText: "It's time to get serious about research fraud https://t.co/sTQh7PoBiW",
+  twText: "It's time to get serious about research fraud",
   twUrl: "https://t.co/sTQh7PoBiW",
   tweetOriginalId: "1287615283595825152",
 };

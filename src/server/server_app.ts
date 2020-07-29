@@ -8,7 +8,7 @@ import passport from 'passport';
 import path from 'path';
 import { registerArticle } from './article';
 import { registerComment } from './comment';
-import { updateAll } from './fetch_rss';
+import { updateAll, updateTweetsEntry } from './fetch_rss';
 import Article from './models/article';
 import Rss from './models/rss';
 import { sequelize } from './models/sequelize-loader';
@@ -16,7 +16,7 @@ import Tweet from './models/tweet';
 import User from './models/user';
 import { authMiddleware, registerRememberMe } from './remember_me';
 import { registerRss } from './rss';
-import { consumerKey, consumerSecret } from './secure_token';
+import { LoginUser }from './common';
 
 
 (async () => {
@@ -77,13 +77,24 @@ app.get('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
   async (req, res) => {
     //DB内の任意のユーザのデータを用いる必要がある？
     //まずは、ログイン後に手動で更新で、
-    if(req.session !== undefined && req.session.loginInfo !== undefined) {
-      await updateAll({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-        access_token_key: req.session.loginInfo.token,
-        access_token_secret: req.session.loginInfo.tokenSecret,
-      });
+    if(req.user !== undefined) {
+      await updateAll((req.user as LoginUser).id);
+      
+      res.json({ status: "ok" });
+    } else {
+      res.json(req.session);
+    }
+  }
+);
+
+app.get('/api/update_tweet/',
+  async (req, res) => {
+    if(req.user !== undefined) {
+      const pointLowerBound = req.query.point_lower_bound ? parseInt(req.query.point_lower_bound as string) : 3;
+      const sinceDayMinus = req.query.since_day_minus ? parseInt(req.query.since_day_minus as string) : 1;
+      const lastElapsed = req.query.last_elapsed ? parseInt(req.query.last_elapsed as string) : 15;
+      
+      updateTweetsEntry((req.user as LoginUser).id, pointLowerBound, sinceDayMinus, lastElapsed);
       
       res.json({ status: "ok" });
     } else {
