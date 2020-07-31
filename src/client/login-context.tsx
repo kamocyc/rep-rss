@@ -1,4 +1,5 @@
 import React, { createContext, Dispatch, useReducer } from "react";
+import { updateRss } from './common';
 
 interface LoginContextType {
   initialized: boolean;
@@ -25,6 +26,10 @@ export const LoginContext = createContext<{
 const reducer = (state: LoginContextType, action: LoginAction): LoginContextType => {
   switch (action.type) {
     case "SET_LOGIN":
+      if(state.initialized === false) {
+        updateRss(() => {});
+      }
+      
       return {
         initialized: true,
         userName: action.payload

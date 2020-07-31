@@ -188,7 +188,9 @@ app.post('/api/logout', function (req, res) {
 // });
 
 
-// app.get('*', function (req, res) {
-//   console.log({isAuthenticated: "send file"});
-//   res.sendFile(path.join(__dirname, 'dist', 'client', 'index.html'))
-// });
+app.get('*', function (req, res) {
+  console.log({isAuthenticated: "send file"});
+
+  res.sendFile('./index.html', { root: path.join('./', 'dist', 'client') });
+});
+//path.join('./', 'dist', 'client')

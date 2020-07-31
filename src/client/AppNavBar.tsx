@@ -1,10 +1,12 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Nav, Navbar } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import { LoginContext } from './login-context';
+import { updateRss } from './common';
 
 export const AppNavBar = () => {
   const {state, dispatch} = useContext(LoginContext);
+  const [updateButtonState, dispathButtonState] = useState(false);
   const loginStatusEndpoint = '/api/login_user';
   const logoutEndpoint = '/api/logout';
   
@@ -55,8 +57,12 @@ export const AppNavBar = () => {
     .catch(error => {
       console.log({"ERR2": error});
     });
-    
   };
+  
+  // const handleUpdateRss = () => {
+  //   dispathButtonState(true)
+  //   updateRss(() => dispathButtonState(false));
+  // };
   
   const loginOutLink = state.userName !== undefined ?
     (<Nav.Link onClick={() => handleLogout()} style={{display: "inline", wordBreak: 'break-all'}}>Logout</Nav.Link>) :
@@ -70,7 +76,7 @@ export const AppNavBar = () => {
       <Navbar.Brand as={Link} to='/'>Rep RSS</Navbar.Brand>
       <Nav className="mr-auto">
         <Nav.Link as={Link} to='/edit_rss'>Edit RSS</Nav.Link>
-        <Nav.Link as={Link} to='/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6'>(Beta) Update RSS</Nav.Link>
+        {/* <Nav.Link onClick={handleUpdateRss} disabled={updateButtonState}>(Beta) Update RSS</Nav.Link> */}
       </Nav>
       <div>
         <Nav style={{display: "inline", wordBreak: 'break-all'}}>{state.userName !== undefined ? state.userName : ""}</Nav>

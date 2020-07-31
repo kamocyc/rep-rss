@@ -16,6 +16,14 @@
   margin-bottom: 0px;
 }
 
+.article-title-for-sub a:link,
+.article-title-for-sub a:visited,
+.article-title-for-sub a:hover,
+.article-title-for-sub a:active {
+  margin-bottom: 0px;
+  color: #333;
+}
+
 .article-point {
   text-align: center;
   font-weight: bold;

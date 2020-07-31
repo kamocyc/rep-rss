@@ -57,7 +57,7 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
   } else if(req.cookies.remember_me) {
     const [rememberToken, hash] = (req.cookies.remember_me as string).split('|');
     
-    console.log({hah: [rememberToken, hash]});
+    // console.log({hah: [rememberToken, hash]});
     
     User.findAll({
       where: {
@@ -105,12 +105,12 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
 /////
 export function registerRememberMe(passport: PassportStatic) {
   passport.serializeUser(function (user, done) {
-    console.log({ser_user: user});
+    // console.log({ser_user: user});
     done(null, user);
   });
 
   passport.deserializeUser(function (obj, done) {
-    console.log({des_user: obj});
+    // console.log({des_user: obj});
     // console.log({"a": process.env.NODE_ENV });
     done(null, obj);
   });
@@ -124,7 +124,7 @@ export function registerRememberMe(passport: PassportStatic) {
   },
     function (req, token, tokenSecret, profile, done) {      
       process.nextTick(function () {
-        console.log({profile: profile});
+        // console.log({profile: profile});
         
         return processTwitterLogin(req, token, tokenSecret, profile.id, profile.displayName, profile, done);
       });
@@ -133,7 +133,7 @@ export function registerRememberMe(passport: PassportStatic) {
 
 function processTwitterLogin(req: any, token: string, tokenSecret: string, userId: string, username: string, fullprofile: any, done: (error: any, user?: any) => void) {
   console.log("processTwitterLogin");
-  console.log(req.session);
+  // console.log(req.session);
   
   const rememberToken = crypto.randomBytes(20).toString('hex');
   const hash = crypto.createHmac('sha256', APP_HASH_KEY)

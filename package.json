@@ -101,9 +101,9 @@
       ],
       "@babel/preset-react",
       "@babel/preset-typescript"
-    ],
-    "engines": {
-      "node": "~14"
-    }
+    ]
+  },
+  "engines": {
+    "node": "~10"
   }
 }

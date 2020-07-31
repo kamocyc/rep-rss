@@ -62,7 +62,7 @@ export const CommentList = () => {
   return (
     <div>
       <AppNavBar />
-      <ArticleItem article={article} index={0} />
+      <ArticleItem article={article} index={0} isList={false} />
       {comments.map((comment, index) => (
         <Comment index={index} key={index} comment={comment} />
       ))}

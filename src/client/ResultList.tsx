@@ -21,7 +21,7 @@ const ResultItem = () => {
   return (
     <div>
       {articles.map((article, index) => (
-        <ArticleItem index={index} key={index} article={article} />
+        <ArticleItem index={index} key={index} article={article} isList={true} />
       ))}
     </div>
   );
