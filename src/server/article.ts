@@ -28,8 +28,8 @@ export function registerArticle(app: Express) {
                   model: Article,
                   limit: TOP_COUNT,
                   separate: false,
-                  //TODO: もっと高い閾値？あるいはユーザごとに変える？
-                  where: { point: { [Op.gte]: 0 } },
+                  //TODO: 0ポイントも表示させると、数が多すぎで混じってきてよろしくない。
+                  where: { point: { [Op.gte]: 1 } },
                   attributes: {
                     include: [
                       [
