@@ -1,5 +1,5 @@
 node_modules
 dist
-secure_token.ts
 yarn-error.log
 exp*.js
+.env
