@@ -15,9 +15,8 @@ export function registerArticle(app: Express) {
       res.setHeader('Last-Modified', (new Date()).toUTCString());
       
       if(req.isAuthenticated()) {
-        const TOP_COUNT = req.query.count ? parseInt(req.query.count as string) : 100;
+        const TOP_COUNT = req.query.count ? parseInt(req.query.count as string) : 150;
         
-        //理想は、ユーザに紐づくものを出したい
         // @ts-ignore
         const user = await User.findByPk(req.user ? (req.user as LoginUser).id : undefined ,{
           include: [
@@ -29,7 +28,8 @@ export function registerArticle(app: Express) {
                   model: Article,
                   limit: TOP_COUNT,
                   separate: false,
-                  where: { point: { [Op.gt]: 6 } },
+                  //TODO: もっと高い閾値？あるいはユーザごとに変える？
+                  where: { point: { [Op.gte]: 0 } },
                   attributes: {
                     include: [
                       [
