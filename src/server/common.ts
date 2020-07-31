@@ -77,3 +77,15 @@ export function decryptToken(encToken: string): string {
   const [ enc, iv ] = encToken.split('|');
   return decrypt(enc, iv, key);
 }
+
+export function subtractDays(date_: Date, days: number): Date {
+  const date = new Date(date_);
+  date.setDate(date.getDate() - days);
+  return date;
+}
+
+export function subtractMinutes(date_: Date, minutes: number): Date {
+  const date = new Date(date_);
+  date.setMinutes(date.getMinutes() - minutes);
+  return date;
+}

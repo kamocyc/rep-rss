@@ -75,7 +75,15 @@ export function updateRss(next: ((reason: any) => void)) {
       }
     );
     
-    return [res1, res2];
+    const res3 = await fetch('/api/article_clean/', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+    })
+    
+    return [res1, res2, res3];
   })().then(next);
 }
   

@@ -2,7 +2,7 @@ import Parser from 'rss-parser';
 import { Op } from 'sequelize';
 import striptags from 'striptags';
 import Twitter from 'twitter-lite';
-import { decryptToken, flatten } from './common';
+import { decryptToken, flatten, subtractDays, subtractMinutes } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import Tweet from './models/tweet';
@@ -93,18 +93,6 @@ export async function updateAll(userId: string) {
   const result = await updateRsses(twClient, rsses);
   
   return result;
-}
-
-function subtractDays(date_: Date, days: number): Date {
-  const date = new Date(date_);
-  date.setDate(date.getDate() - days);
-  return date;
-}
-
-function subtractMinutes(date_: Date, minutes: number): Date {
-  const date = new Date(date_);
-  date.setMinutes(date.getMinutes() - minutes);
-  return date;
 }
 
 export async function updateTweetsEntry(userId: string, pointLowerBound: number, sinceDayMinus: number, lastElapsed: number) {

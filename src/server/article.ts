@@ -1,10 +1,34 @@
 import { Express } from 'express';
 import { Op, Sequelize } from 'sequelize';
-import { LoginUser, flatten } from './common';
+import { LoginUser, flatten, subtractDays } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import User from './models/user';
 // import { sequelize, database } from './models/sequelize-loader';
+
+
+export function deleteUnusedArticle(app: Express) {
+  app.post('/api/article_clean', async (req, res) => {
+    const nowDate = new Date();
+    
+    await Article.destroy({ where: {
+      [Op.or]: [
+        {
+          [Op.and]: [
+            { point: { [Op.lte]: 3 }},
+            { pubDate: { [Op.lte]: subtractDays(nowDate, 1) } }
+          ]
+        },{
+          [Op.and]: [
+            { pubDate: { [Op.lte]: subtractDays(nowDate, 3) }}
+          ]
+        }
+      ]
+    } } );
+    
+    res.json({status: "ok"});
+  });
+}
 
 //user rss article 
 
@@ -33,7 +57,7 @@ export function registerArticle(app: Express) {
                   attributes: {
                     include: [
                       [
-                        Sequelize.literal('(extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 20)'),
+                        Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 20)'),
                         'calculatedPoint'
                       ],
                       [

@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import logger from 'morgan';
 import passport from 'passport';
 import path from 'path';
-import { registerArticle } from './article';
+import { registerArticle, deleteUnusedArticle } from './article';
 import { registerComment } from './comment';
 import { updateAll, updateTweetsEntry } from './fetch_rss';
 import Article from './models/article';
@@ -102,6 +102,8 @@ app.get('/api/update_tweet/',
     }
   }
 );
+
+deleteUnusedArticle(app);
 
 registerArticle(app);
 
