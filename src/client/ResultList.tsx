@@ -12,7 +12,7 @@ const ResultItem = () => {
     fetch(listApiEndpoint)
     .then(res => res.json())
     .then((list: { articles: ArticleType[]}) => {
-      list.articles.sort((a, b) => a.calculatedPoint - b.calculatedPoint);
+      list.articles.sort((a, b) => b.calculatedPoint - a.calculatedPoint);
       console.log({"list.articles": list.articles});
       setArticles(list.articles);
     });

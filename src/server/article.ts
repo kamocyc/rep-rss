@@ -57,7 +57,7 @@ export function registerArticle(app: Express) {
                   attributes: {
                     include: [
                       [
-                        Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 20)'),
+                        Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 10)'),
                         'calculatedPoint'
                       ],
                       [
@@ -74,7 +74,7 @@ export function registerArticle(app: Express) {
               ]
             }
           ],
-          order: [[Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 20)'), 'DESC']],
+          order: [[Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 10)'), 'DESC']],
         });
         
         if(user === null) {
