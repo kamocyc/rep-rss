@@ -44,21 +44,27 @@ module.exports = merge({
   mode: 'development',
   devServer: {
     historyApiFallback: true,
-    inline: true,
+    // inline: true,
     open: true,
     host: '127.0.0.1',
     port: 8080,
+    index: '',
     proxy: {
-      '/api/**': {
-        target: 'http://192.168.0.13:3000',
+      '**': {
+        target: 'http://192.168.0.10:3000',
         secure: false,
         logLevel: 'debug'
       },
-      '/auth/**': {
-        target: 'http://192.168.0.13:3000',
-        secure: false,
-        logLevel: 'debug'
-      }
+      // '/api/**': {
+      //   target: 'http://192.168.0.10:3000',
+      //   secure: false,
+      //   logLevel: 'debug'
+      // },
+      // '/auth/**': {
+      //   target: 'http://192.168.0.10:3000',
+      //   secure: false,
+      //   logLevel: 'debug'
+      // }
     },
   }
 }); 

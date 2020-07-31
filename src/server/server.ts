@@ -1,6 +1,8 @@
 import { app } from './server_app';
 
 //テスト時にこれを呼び出すと、テストが終了しなくなる。
-app.listen(3000, ()=> {
+const port = process.env.PORT || '3000';
+
+app.listen(port, ()=> {
   console.log('server running');
 });

@@ -10,10 +10,11 @@ export const AppNavBar = () => {
   
   useEffect(() => {
     fetch(loginStatusEndpoint, {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: 'include',
     })
     .then(async response => {
       const data = await response.json();
@@ -36,10 +37,11 @@ export const AppNavBar = () => {
   
   const handleLogout = () => {
     fetch(logoutEndpoint, {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: 'include',
     })
     .then(async response => {
       const data = await response.json();

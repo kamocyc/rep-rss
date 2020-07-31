@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { ArticleItem } from './ArticleItem';
 import { ArticleType } from './common';
+import { LoginContext } from './login-context';
 
 const ResultItem = () => {
   const listApiEndpoint = '/api/article_get';
   const [articles, setArticles] = useState<ArticleType[]>([]);
+  const { state: loginState } = useContext(LoginContext);
   
   useEffect(() => {
     fetch(listApiEndpoint)
@@ -14,7 +16,7 @@ const ResultItem = () => {
       console.log({"list.articles": list.articles});
       setArticles(list.articles);
     });
-  }, []);
+  }, [loginState.userName]);
   
   return (
     <div>

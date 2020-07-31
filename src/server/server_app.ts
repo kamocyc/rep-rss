@@ -109,32 +109,86 @@ registerComment(app);
 
 registerRss(app);
 
-app.get('/api/login_user', authMiddleware, (req, res) => {
-  res.send({userInfo: req.user});
+app.post('/api/login_user', authMiddleware, (req, res) => {
+  // Without req.session.save, we have to login twice!!!
+  console.log({"req.session": req.session});
+  
+  if(req.session !== undefined) {              
+    req.session.save(() => {
+      res.header('Access-Control-Allow-Credentials','true');
+      res.send({userInfo: req.user});
+    })
+  } else {
+    res.header('Access-Control-Allow-Credentials','true');
+    res.send({userInfo: req.user});
+  }
 });
 
-app.get('/api/logout', function (req, res) {
+app.post('/api/logout', function (req, res) {
   console.log("LOGOUT!");
+  
+  res.clearCookie('remember_me');
   
   req.logout();
   if(req.session !== undefined) {
-    res.clearCookie('remember-me');
-    
+    console.log("session exists!");
     req.session.destroy((err) => {
       if(err) {
         console.log({err: err});
       }
-      return res.send({status: 'ok'});
+      //これが必要って書いてあったが、要らない？
+      //res.header('Access-Control-Allow-Credentials','true');
+      return res.send({status:  'ok'});
     });
+  } else {
+    console.log("session not exists!");
+    return res.send({status: 'ok'});
   }
+});
+
+// app.get('/api/aa', (req, res) => {
+//   res.cookie('aaa', 'ccc');
+//   res.send({api: 'test'});
+// });
+
+// app.get('/api/a', (req, res) => {
+//   res.cookie('aaa', '');
+//   res.clearCookie('aaa');
+//   res.header('Access-Control-Allow-Credentials','true');
+//   res.send({api: 'test'});
+// });
+
+// app.get('/api/b', (req, res) => {
+//   res.cookie('aaa', 'bbb');
+//   res.header('Access-Control-Allow-Credentials','true');
+//   res.send({api: 'test'});
+// });
+
+// app.get('/api/c', (req, res) => {
+//   res.cookie('aaa', '');
+//   res.clearCookie('aaa');
   
-  return res.send({status: 'ok'});
-});
+//   req.logout();
+  
+//   res.header('Access-Control-Allow-Credentials','true');
+//   res.send({api: 'test'});
+// });
 
-app.get('/api', (req, res) => {
-  res.send({api: 'test'});
-});
+// app.get('/api/d', (req, res) => {
+//   res.cookie('aaa', '');
+//   res.clearCookie('aaa');
+  
+//   req.logout();
+  
+//   if(req.session!== undefined) {
+//     req.session.destroy((err) => {
+//       res.send({api: 'test'});
+//     });
+//   }
+// });
 
-app.get('*', function (req, res) {
-  res.sendFile(path.join('./', 'dist', 'client', 'index.html'))
-});
+
+// app.get('*', function (req, res) {
+//   console.log({isAuthenticated: "send file"});
+//   res.sendFile(path.join(__dirname, 'dist', 'client', 'index.html'))
+// });

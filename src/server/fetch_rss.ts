@@ -1,16 +1,16 @@
 import Parser from 'rss-parser';
+import { Op } from 'sequelize';
 import striptags from 'striptags';
 import Twitter from 'twitter-lite';
-import { Op, Sequelize } from 'sequelize';
-
-import { flatten } from './common';
+import { decryptToken, flatten } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import Tweet from './models/tweet';
 import User from './models/user';
 import { ProcessTweetsMain, TweetType } from './process_tweet';
-import { searchAllTweets, QuerySetting, SearchApiStatus } from './twitter_api';
 import { consumerKey, consumerSecret } from './secure_token';
+import { QuerySetting, searchAllTweets, SearchApiStatus } from './twitter_api';
+
 
 //articleの最大長
 const ARTICLE_BODY_MAX = 255;
@@ -62,8 +62,8 @@ async function getUserAndToken(userId: string, options: any) {
   const userToken: UserToken = {
     consumer_key: consumerKey,
     consumer_secret: consumerSecret,
-    access_token_key: user.oauthToken,
-    access_token_secret: user.oauthTokenSecret,
+    access_token_key: decryptToken(user.oauthToken),
+    access_token_secret: decryptToken(user.oauthTokenSecret),
   };
   
   return { user, userToken, status: 'ok' };

@@ -1,15 +1,9 @@
-import { Strategy as TwitterStrategy } from 'passport-twitter';
-import { consumerKey, consumerSecret } from './secure_token';
-import User from './models/user';
-import { PassportStatic } from 'passport';
 import crypto from 'crypto';
-
-interface UserType {
-  userId: string;
-  username: string;
-  oauthToken: string;
-  oauthTokenSecret: string;
-}
+import { PassportStatic } from 'passport';
+import { Strategy as TwitterStrategy } from 'passport-twitter';
+import { encryptToken } from './common';
+import User from './models/user';
+import { APP_HASH_KEY, consumerKey, consumerSecret, siteUrl } from './secure_token';
 
 // function consumeRememberMeToken(token: string, fn: (err: any, userId?: string) => void) {
 //   User.destroy({ where: { rememberToken: token }}).then((users) => {
@@ -36,8 +30,8 @@ function saveRememberMeToken(token: string, userId: string, username: string, oa
       console.log("create");
       User.create({ 
         userId: userId,
-        oauthToken: oauthToken,
-        oauthTokenSecret: oauthTokenSecret,
+        oauthToken: encryptToken(oauthToken),
+        oauthTokenSecret: encryptToken(oauthTokenSecret),
         username: username,
         rememberToken: token,
       }).then(() => {
@@ -46,8 +40,8 @@ function saveRememberMeToken(token: string, userId: string, username: string, oa
     } else {
       console.log("update");
       user.rememberToken = token;
-      user.oauthToken = oauthToken;
-      user.oauthTokenSecret = oauthTokenSecret;
+      user.oauthToken = encryptToken(oauthToken);
+      user.oauthTokenSecret = encryptToken(oauthTokenSecret);
       user.save().then(() => {
         return fn();
       });
@@ -55,12 +49,10 @@ function saveRememberMeToken(token: string, userId: string, username: string, oa
   });
 }
 
-const siteUrl = 'http://127.0.0.1:8080/';
-
-const APP_HASH_KEY = 'MY APP';
-
 export const authMiddleware = (req: any, res: any, next: () => void) => {
+  console.log({isAuthenticated: "DO"});
   if(req.isAuthenticated()) {
+    console.log({isAuthenticated: "isAuthenticated!"});
     next();
   } else if(req.cookies.remember_me) {
     const [rememberToken, hash] = (req.cookies.remember_me as string).split('|');
@@ -94,20 +86,13 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
                 console.log({err: err});
                 
                 // セキュリティ的はここで remember_me を再度更新すべき
-                req.session.loginInfo = {
-                  token: user.oauthToken,
-                  tokenSecret: user.oauthTokenSecret
-                };
-                
-                console.log(req.session.loginInfo);
-                
                 next();
               });
             // });
           // });
         }
         
-        console.log({hash, verifyingHash});
+        //console.log({hash, verifyingHash});
       }
       
       //res.redirect(302, '/login');
@@ -126,6 +111,7 @@ export function registerRememberMe(passport: PassportStatic) {
 
   passport.deserializeUser(function (obj, done) {
     console.log({des_user: obj});
+    // console.log({"a": process.env.NODE_ENV });
     done(null, obj);
   });
 
@@ -155,11 +141,6 @@ function processTwitterLogin(req: any, token: string, tokenSecret: string, userI
     .digest('hex');
   
   if(req.session !== undefined) {
-    req.session.loginInfo = {
-      token: token,
-      tokenSecret: tokenSecret
-    };
-    
     req.session.remember_me = rememberToken + '|' + hash;
   }
   

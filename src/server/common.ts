@@ -1,4 +1,6 @@
 import { Express } from 'express';
+import crypto from 'crypto';
+import { APP_ENC_KEY, APP_HASH_KEY } from './secure_token';
 
 export interface LoginUser extends Express {
   id: string,
@@ -38,4 +40,40 @@ export function formatTime(d: Date): string {
 
 export function flatten<T>(arr: T[][]): T[] {
   return ([] as T[]).concat.apply([], arr);
+}
+
+const encryptAlgorithm = 'aes-256-cbc';
+
+function encrypt(text: string, key: Buffer): { iv: string, encrypted: string} {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(
+    encryptAlgorithm,
+    key,
+    iv);
+  
+  const encrypted = cipher.update(text);
+  
+  return {
+    iv: iv.toString('hex'),
+    encrypted: Buffer.concat([encrypted, cipher.final()]).toString('hex')
+  };
+}
+
+export function decrypt(encrypted: string, ivString: string, key: Buffer): string {
+  const iv = Buffer.from(ivString, 'hex');
+  const decipher = crypto.createDecipheriv(encryptAlgorithm, key, iv);
+  const decrypted = decipher.update(Buffer.from(encrypted, 'hex'));
+  return Buffer.concat([decrypted, decipher.final()]).toString();
+}
+
+export function encryptToken(token: string): string {
+  const key = crypto.createHmac('sha256', APP_HASH_KEY).update(APP_ENC_KEY).digest();
+  const { iv, encrypted } = encrypt(token, key);
+  return encrypted + '|' + iv;
+}
+
+export function decryptToken(encToken: string): string {
+  const key = crypto.createHmac('sha256', APP_HASH_KEY).update(APP_ENC_KEY).digest();
+  const [ enc, iv ] = encToken.split('|');
+  return decrypt(enc, iv, key);
 }

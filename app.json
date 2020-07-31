@@ -1,0 +1,7 @@
+{
+  "name": "Rep RSS",
+  "description": "Rep rss.",
+  "logo": "",
+  "keywords": ["node"],
+  "image": "heroku/nodejs"
+}

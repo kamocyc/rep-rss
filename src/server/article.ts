@@ -11,6 +11,9 @@ import User from './models/user';
 export function registerArticle(app: Express) {
   app.get('/api/article_get',
     async (req, res) => {
+      //これがないと、304 (cached) になって更新されない！
+      res.setHeader('Last-Modified', (new Date()).toUTCString());
+      
       if(req.isAuthenticated()) {
         const TOP_COUNT = req.query.count ? parseInt(req.query.count as string) : 100;
         
