@@ -21,7 +21,7 @@ export const AppNavBar = () => {
     })
     .then(async response => {
       const data = await response.json();
-      console.log(data);
+      
       if(data.userInfo !== undefined) {
         dispatch({
           type: "SET_LOGIN",
@@ -71,7 +71,7 @@ export const AppNavBar = () => {
   // };
   
   const loginOutLink = state.userName !== undefined ?
-    (<Nav.Link onClick={() => handleLogout()} style={{display: "inline", wordBreak: 'break-all'}}>{tr("logout")}</Nav.Link>) :
+    (<Nav.Link onClick={() => handleLogout()} className="logout-link">{tr("logout")}</Nav.Link>) :
     (<Nav.Link as={Link} to="/login" style={{display: "inline"}}>{tr('login')}</Nav.Link>);  
   
   //console.log(state);

@@ -4,6 +4,13 @@
   word-wrap: break-word;
 }
 
+.logout-link {
+  display: block;
+  word-break: break-all;
+  font-size: 80%;
+  padding: 0px;
+}
+
 .link-in-list > a {
   color: #888;
 }

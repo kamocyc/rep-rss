@@ -73,7 +73,7 @@ app.get('/auth/twitter',
   passport.authenticate('twitter', { scope: ['user:email'] }),
   function (/*_req, _res*/) {});
 
-app.get('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
+app.post('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
   async (req, res) => {
     //DB内の任意のユーザのデータを用いる必要がある？
     //まずは、ログイン後に手動で更新で、
@@ -87,7 +87,7 @@ app.get('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
   }
 );
 
-app.get('/api/update_tweet/',
+app.post('/api/update_tweet/',
   async (req, res) => {
     if(req.user !== undefined) {
       const pointLowerBound = req.query.point_lower_bound ? parseInt(req.query.point_lower_bound as string) : 3;
@@ -191,7 +191,9 @@ app.post('/api/logout', function (req, res) {
 
 
 app.get('*', function (req, res) {
-  console.log({isAuthenticated: "send file"});
+  console.log({send_file: "send file"});
+  console.log({isAuthenticated: req.isAuthenticated()});
+  console.log({session: req.session});
 
   res.sendFile('./index.html', { root: path.join('./', 'dist', 'client') });
 });

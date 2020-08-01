@@ -55,18 +55,21 @@ export const useDataApi = < T, S >(initialUrl: string, fetchOptions: RequestInit
     let didCancel = false;
  
     const fetchData = async () => {
-      dispatch({ type: 'FETCH_INIT' });
- 
-      try {
-        const result = await fetch(url, fetchOptions);
-        const data = (await result.json()) as T;
-        console.log({reloaded_data: data});
-        if (!didCancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: data });
-        }
-      } catch (error) {
-        if (!didCancel) {
-          dispatch({ type: 'FETCH_FAILURE' });
+      if(url !== '') {
+        dispatch({ type: 'FETCH_INIT' });
+  
+        try {
+          const result = await fetch(url, fetchOptions);
+          const data = (await result.json()) as T;
+          // const data = { articles: [], status: 'ok' };
+          console.log({reloaded_data: data});
+          if (!didCancel) {
+            dispatch({ type: 'FETCH_SUCCESS', payload: data });
+          }
+        } catch (error) {
+          if (!didCancel) {
+            dispatch({ type: 'FETCH_FAILURE' });
+          }
         }
       }
     };
@@ -78,5 +81,5 @@ export const useDataApi = < T, S >(initialUrl: string, fetchOptions: RequestInit
     };
   }, [url, checkData]);
  
-  return {state, setUrl, checkData, setCheckData};
+  return {state, url, setUrl, checkData, setCheckData};
 };

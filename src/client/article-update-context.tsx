@@ -71,7 +71,12 @@ export const ArticleUpdateContextProvider = (props: any) => {
   const listApiEndpoint = '/api/article_get';
   const [state, dispatch] = useReducer(reducer, initState);
   const { state: loginState } = useContext(GlobalContext);
-  const { state: articleDataState, checkData, setCheckData } = useDataApi<{ articles: ArticleType[], status: string }, {count: number}>(listApiEndpoint, { method: 'GET' }, {count: 0}, { articles: [], status: "uninitialized" });
+  const { state: articleDataState, url: currentUrl, checkData, setCheckData, setUrl } =
+    useDataApi<{ articles: ArticleType[], status: string }, {count: number}>(
+      '',
+      { method: 'GET' },
+      { count: 0 },
+      { articles: [], status: "uninitialized" });
   
   useEffect(() => {
     console.log({articleDataState: articleDataState})
@@ -79,61 +84,70 @@ export const ArticleUpdateContextProvider = (props: any) => {
   }, [articleDataState]);
   
   useEffect(() => {
-    if(articleDataState.isLoading === false) {
-      console.log({reloadcount: state.reloadCount});
-      setCheckData({count: checkData.count + 1});
+    console.log({"loginState.userName": loginState.userName});
+    if(articleDataState.isLoading !== true) {
+      if(loginState.userName !== undefined) {
+        if(currentUrl === '') {
+          setUrl(listApiEndpoint); 
+        } else {
+          console.log({reloadcount: state.reloadCount});
+          setCheckData({count: checkData.count + 1});
+        }
+      }
     } else {
       console.log({reloadcount: state.reloadCount, loading: articleDataState.isLoading});
     }
   }, [loginState.userName, state.reloadCount]);
   
   useEffect(() => {
-    (async () => {
-      // setArticleUpdateState({status: 'wait_update_article'});
-      
-      const res1 = await fetch('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6', {
-          method: 'GET',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: 'include',
-        }
-      );
-      
-      const { count: count1 } = await res1.json();
-      // setArticleUpdateState({status: 'wait_update_tweet'});
-      
-      const res2 = await fetch('/api/update_tweet/', {
-          method: 'GET',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: 'include',
-        }
-      );
-      
-      const { count: count2 } = await res2.json();
-      // setArticleUpdateState({status: 'wait_article_clean'});
-      // if(count1 + count2 > 0) {
-        //reloadする
-        dispatch({type: 'RELOAD'});
-      // }
-      
-      const res3 = await fetch('/api/article_clean/', {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: 'include',
-      })
-      
-      // setArticleUpdateState({status: 'done'});
-      
-      dispatch({type: '__FINISH_UPDATING'});
-      
-      return [res1, res2, res3];
-    })();
-  }, [state.updateCount]);
+    if(loginState.userName !== undefined) {
+      (async () => {
+        // setArticleUpdateState({status: 'wait_update_article'});
+        
+        const res1 = await fetch('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6', {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: 'include',
+          }
+        );
+        
+        const { count: count1 } = await res1.json();
+        // setArticleUpdateState({status: 'wait_update_tweet'});
+        
+        const res2 = await fetch('/api/update_tweet/', {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: 'include',
+          }
+        );
+        
+        const { count: count2 } = await res2.json();
+        // setArticleUpdateState({status: 'wait_article_clean'});
+        // if(count1 + count2 > 0) {
+          //reloadする
+          dispatch({type: 'RELOAD'});
+        // }
+        
+        const res3 = await fetch('/api/article_clean/', {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: 'include',
+        })
+        
+        // // setArticleUpdateState({status: 'done'});
+        
+        dispatch({type: '__FINISH_UPDATING'});
+        
+        return;
+      })();
+    }
+  }, [loginState.userName, state.updateCount]);
   
   return <ArticleUpdateContext.Provider value={{state, dispatch}}>{props.children}</ArticleUpdateContext.Provider>;
 }
