@@ -1,41 +1,38 @@
 import React, { createContext, Dispatch, useReducer } from "react";
-import { updateRss } from './common';
 
-interface LoginContextType {
+interface GlobalContextType {
   initialized: boolean;
   userName: string | undefined;
 }
 interface LoginAction {
-  type: string;
-  payload: string | undefined;
+  type: 'SET_LOGIN' | 'SET_LOGOUT' | 'INC_RSS_UPDATE';
+  payload?: string | undefined;
 }
 
-const initState: LoginContextType = {
+const initState: GlobalContextType = {
   initialized: false,
   userName: undefined,
 };
 
-export const LoginContext = createContext<{
-  state: LoginContextType;
+export const GlobalContext = createContext<{
+  state: GlobalContextType;
   dispatch: Dispatch<LoginAction>;
 }>({
   state: initState,
   dispatch: () => null
 });
 
-const reducer = (state: LoginContextType, action: LoginAction): LoginContextType => {
+const reducer = (state: GlobalContextType, action: LoginAction): GlobalContextType => {
   switch (action.type) {
     case "SET_LOGIN":
-      if(state.initialized === false) {
-        updateRss(() => {});
-      }
-      
       return {
+        ...state,
         initialized: true,
         userName: action.payload
       };  
     case "SET_LOGOUT":
       return {
+        ...state,
         initialized: true,
         userName: undefined
       };
@@ -44,8 +41,8 @@ const reducer = (state: LoginContextType, action: LoginAction): LoginContextType
   }
 };
 
-export const LoginContextProvider = (props: any) => {
+export const GlobalContextProvider = (props: any) => {
   const [state, dispatch] = useReducer(reducer, initState);
   
-  return <LoginContext.Provider value={{state, dispatch}}>{props.children}</LoginContext.Provider>
+  return <GlobalContext.Provider value={{state, dispatch}}>{props.children}</GlobalContext.Provider>
 }

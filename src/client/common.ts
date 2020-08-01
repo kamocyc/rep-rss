@@ -54,37 +54,3 @@ export function getReadableInterval(date1: Date, date2: Date): string {
   
   return Math.round(intervalSec / 60 / 60 / 24) + " " + toPlural(intervalSec, suffices.day);
 }
-
-export function updateRss(next: ((reason: any) => void)) {
-  (async () => {
-    const res1 = await fetch('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6', {
-        method: 'GET',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-      }
-    );
-    
-    const res2 = await fetch('/api/update_tweet/', {
-        method: 'GET',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-      }
-    );
-    
-    const res3 = await fetch('/api/article_clean/', {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-    })
-    
-    return [res1, res2, res3];
-  })().then(next);
-}
-  
-  

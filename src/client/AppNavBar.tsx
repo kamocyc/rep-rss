@@ -1,12 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { Nav, Navbar } from 'react-bootstrap';
 import { Link } from "react-router-dom";
-import { LoginContext } from './login-context';
-import { updateRss } from './common';
+import { GlobalContext } from './login-context';
+// import { updateRss } from './common';
 
 export const AppNavBar = () => {
-  const {state, dispatch} = useContext(LoginContext);
-  const [updateButtonState, dispathButtonState] = useState(false);
+  const {state, dispatch} = useContext(GlobalContext);
+  // const [updateButtonState, dispathButtonState] = useState(false);
   const loginStatusEndpoint = '/api/login_user';
   const logoutEndpoint = '/api/logout';
   
@@ -20,6 +20,7 @@ export const AppNavBar = () => {
     })
     .then(async response => {
       const data = await response.json();
+      console.log(data);
       if(data.userInfo !== undefined) {
         dispatch({
           type: "SET_LOGIN",
@@ -33,6 +34,10 @@ export const AppNavBar = () => {
       }
     })
     .catch(error => {
+      dispatch({
+        type: "SET_LOGOUT",
+        payload: undefined
+      });
       console.log({"ERR": error});
     });
   }, []);

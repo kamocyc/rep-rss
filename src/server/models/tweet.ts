@@ -57,5 +57,7 @@ Tweet.init(
     type: DataTypes.STRING,
   }
 },{
+  tableName: "Tweets",
+  modelName: "Tweet",
   sequelize
 });

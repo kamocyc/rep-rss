@@ -6,11 +6,11 @@ import { ArticleItem } from './ArticleItem';
 import { ArticleType, CommentType, getReadableInterval } from './common';
 
 function getTweetUrl(userScreenName: string, tweetId: string): string {
-  return "https://twitter.com/" + userScreenName + "/status/" + tweetId;
+  return `https://twitter.com/${userScreenName}/status/${tweetId}`;
 }
 
 function getTwitterUserUrl(userScreenName: string): string {
-  return "https://twitter.com/" + userScreenName;
+  return `https://twitter.com/${userScreenName}`;
 }
 
 const Comment = ({ comment } : { index: number, comment: CommentType }) => {
@@ -21,7 +21,7 @@ const Comment = ({ comment } : { index: number, comment: CommentType }) => {
       <Container>
         <Row>
           <span className="tweet-display-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{comment.name}</a></span>
-          <span className="tweet-id-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{"@" + comment.twScreenName}</a></span>
+          <span className="tweet-id-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{`@${comment.twScreenName}`}</a></span>
           <span className="tweet-time"><a href={getTweetUrl(comment.twScreenName, comment.tweetOriginalId)}>{elapsed}</a></span>
         </Row>
         <Row>{comment.text}</Row>

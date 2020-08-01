@@ -6,6 +6,7 @@ export default class Rss extends Model {
   public url!: string;
   public title!: string;
   public maxPubDate!: Date;
+  public updatingLockUntil!: Date;
 }
 
 Rss.init({
@@ -24,6 +25,13 @@ Rss.init({
   },
   maxPubDate: {
     type: DataTypes.DATE,
+  },
+  updatingLockUntil: {
+    type: DataTypes.DATE,
   }
 },
-{sequelize});
+{
+  tableName: "Rsses",
+  modelName: "Rss",
+  sequelize
+});

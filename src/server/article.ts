@@ -4,6 +4,7 @@ import { LoginUser, flatten, subtractDays } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import User from './models/user';
+import Tweet from './models/tweet';
 // import { sequelize, database } from './models/sequelize-loader';
 
 
@@ -38,11 +39,13 @@ export function registerArticle(app: Express) {
       //これがないと、304 (cached) になって更新されない！
       res.setHeader('Last-Modified', (new Date()).toUTCString());
       
-      if(req.isAuthenticated()) {
+      if(req.isAuthenticated() && req.user) {
         const TOP_COUNT = req.query.count ? parseInt(req.query.count as string) : 150;
         
+        const rssArticles = `"${Rss.tableName}->${Article.tableName}"`;
+        
         // @ts-ignore
-        const user = await User.findByPk(req.user ? (req.user as LoginUser).id : undefined ,{
+        const user = await User.findByPk((req.user as LoginUser).id ,{
           include: [
             {
               model: Rss,
@@ -57,14 +60,14 @@ export function registerArticle(app: Express) {
                   attributes: {
                     include: [
                       [
-                        Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 10)'),
+                        Sequelize.literal(`(${rssArticles}."point" - extract(epoch from NOW() - ${rssArticles}."pubDate") / 60 / 10)`),
                         'calculatedPoint'
                       ],
                       [
                         Sequelize.literal(`(
                             SELECT COUNT(*)
-                            FROM "Tweets" As "Tweets"
-                            WHERE "Tweets"."articleId" = "Rsses->Articles"."articleId"
+                            FROM "${Tweet.tableName}" As "Tweets"
+                            WHERE "Tweets"."articleId" = ${rssArticles}."articleId"
                         )`),
                         'tweetCount'
                       ]
@@ -74,12 +77,12 @@ export function registerArticle(app: Express) {
               ]
             }
           ],
-          order: [[Sequelize.literal('("Rsses->Articles"."point" - extract(epoch from NOW() - "Rsses->Articles"."pubDate") / 60 / 10)'), 'DESC']],
+          order: [[Sequelize.literal(`(${rssArticles}."point" - extract(epoch from NOW() - ${rssArticles}."pubDate") / 60 / 10)`), 'DESC']],
         });
         
         if(user === null) {
           res.json({
-            'status': 'not_logged_in',
+            status: 'not_logged_in',
             articles: [],
           });
           return;
@@ -95,6 +98,24 @@ export function registerArticle(app: Express) {
         // console.dir(user, { depth: 10});
         
         const articles = flatten(((user as any).Rsses as Rss[]).map(r => (r as any).Articles as Article[]));
+        
+        if(articles.length === 0) {
+          const user_ = await User.findByPk((req.user as LoginUser).id, {
+            include: [
+              {
+                model: Rss,
+              }
+            ]}
+          );
+          
+          if(((user_ as any).Rsses as Rss[]).length === 0) {
+            res.json({
+              status: 'no_rss',
+              articles: []
+            });
+            return;
+          }
+        }
         
         res.json({
           status: 'ok',

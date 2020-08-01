@@ -10,7 +10,8 @@ import User from './models/user';
 import { ProcessTweetsMain, TweetType } from './process_tweet';
 import { consumerKey, consumerSecret } from './secure_token';
 import { QuerySetting, searchAllTweets, SearchApiStatus } from './twitter_api';
-
+import { sequelize } from './models/sequelize-loader';
+import { Transaction } from 'sequelize';
 
 //articleの最大長
 const ARTICLE_BODY_MAX = 255;
@@ -69,22 +70,44 @@ async function getUserAndToken(userId: string, options: any) {
   return { user, userToken, status: 'ok' };
 }
 
-export async function updateAll(userId: string) {
-  const { user, userToken, status } = await getUserAndToken(userId, {
-    include: [
-      {
-        model: Rss,
-        separate: false,
-      }
-    ]
-  });
-  // console.log({userToken: userToken});
+export async function updateAll(userId: string): Promise<{
+    status: string;
+    count: number;
+}> {
   
-  if(userToken === undefined) {
+  const userResult = await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE }, async (t) => {
+    const { user, userToken, status } = await getUserAndToken(userId, {
+      include: [
+        {
+          model: Rss,
+          separate: false,
+          where: { updatingLockUntil: { [Op.or]: { [Op.is]: null, [Op.lt]: new Date() } } }
+        }
+      ],
+      transaction: t
+    });
+    
+    if(userToken === undefined) {
+      return {
+        status: status,
+        userToken: undefined,
+      };
+    }
+  
+    const rssIds = ((user as any).Rsses as Rss[]).map(r => r.rssId);
+    await Rss.update({updatingLockUntil: subtractMinutes(new Date(), -15) }, { where: {rssId: { [Op.in]: rssIds } }, transaction: t});
+    
+    return { user, userToken, status };
+  });
+  
+  if(userResult.userToken === undefined) {
     return {
-      status: status
+      status: userResult.status,
+      count: 0
     };
   }
+  
+  const { userToken, user } = userResult;
   
   const twClient = new Twitter(userToken);
   
@@ -92,46 +115,77 @@ export async function updateAll(userId: string) {
   
   const result = await updateRsses(twClient, rsses);
   
+  await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE }, async (t) => {
+    const rssIds = ((user as any).Rsses as Rss[]).map(r => r.rssId)
+    await Rss.update({updatingLockUntil: null}, { where: {rssId: { [Op.in]: rssIds } }, transaction: t});
+  });
+    
   return result;
 }
 
-export async function updateTweetsEntry(userId: string, pointLowerBound: number, sinceDayMinus: number, lastElapsed: number) {
+export async function updateTweetsEntry(userId: string, pointLowerBound: number, sinceDayMinus: number, lastElapsed: number): Promise<{
+    status: string;
+    count: number;
+}> {
   const nowDate = new Date();
   
   //既にある記事で、ポイントが多くて(10以上)、今から1日以内、最後に更新してから30分以上経ったものを更新対象とする。
-  const { user, userToken } = await getUserAndToken(userId, {
-    include: [
-      {
-        model: Rss,
-        separate: false,
-        include: [
-          {
-            model: Article,
-            separate: false,
-            where: { [Op.and]: [
-              { point: { [Op.gte]: pointLowerBound } },
-              { pubDate: { [Op.gte]: subtractDays(nowDate, sinceDayMinus) } },
-              { count_twitter_updated: { [Op.lt]: subtractMinutes(nowDate, lastElapsed) } },
-            ]},
-          }
-        ]
-      }
-    ]
-  });
+
+  const userResult = await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE }, async (t) => {
+    const { user, userToken } = await getUserAndToken(userId, {
+      include: [
+        {
+          model: Rss,
+          separate: false,
+          include: [
+            {
+              model: Article,
+              separate: false,
+              where: { [Op.and]: [
+                { point: { [Op.gte]: pointLowerBound } },
+                { pubDate: { [Op.gte]: subtractDays(nowDate, sinceDayMinus) } },
+                { count_twitter_updated: { [Op.lt]: subtractMinutes(nowDate, lastElapsed) } },
+                { updatingLockUntil: { [Op.or]: { [Op.is]: null, [Op.lt]: new Date() } } }
+              ]},
+            }
+          ]
+        }
+      ],
+      transaction: t
+    });
+    
+    if(userToken === undefined) {
+      return undefined;
+    }
   
-  if(userToken === undefined) {
+    const articles = flatten(((user as any).Rsses as Rss[]).map(r => (r as any).Articles as Article[]));
+    
+    //TODO: INが非常に多くなりうるので改善する
+    const articleIds = articles.map(a => a.articleId);
+    await Article.update({updatingLockUntil: subtractMinutes(new Date(), -15)}, { where: {articleId: { [Op.in]: articleIds } }, transaction: t});
+    
+    return { user, userToken, articles };
+  });
+
+  if(userResult === undefined) {
     return {
-      status: status
+      status: 'not_logged_in',
+      count: 0
     };
   }
   
-  const twClient = new Twitter(userToken);
+  const { userToken, articles } = userResult;
   
-  const articles = flatten(((user as any).Rsses as Rss[]).map(r => (r as any).Articles as Article[]));
+  const twClient = new Twitter(userToken);
   
   console.log({UPDATE_ARTICLES: articles});
   
   const result = await updateTweets(twClient, articles);
+  
+  await sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE }, async (t) => {
+    const articleIds = articles.map(a => a.articleId);
+    await Article.update({updatingLockUntil: null}, { where: {articleId: { [Op.in]: articleIds } }, transaction: t});
+  });
   
   return result;
 }
@@ -139,7 +193,7 @@ export async function updateTweetsEntry(userId: string, pointLowerBound: number,
 async function updateRsses(twClient: Twitter, rsses: Rss[]) {
   const statuses = await Promise.all(rsses.map(async (rss) => {
     // console.log({rss: rss});
-    const { title, maxPubDate, status } = await updateRss(rss, twClient);
+    const { title, maxPubDate, status, count } = await updateRss(rss, twClient);
     // console.log({ title, maxPubDate, rssId: rss.rssId });
     
     await Rss.update(
@@ -154,12 +208,15 @@ async function updateRsses(twClient: Twitter, rsses: Rss[]) {
       }
     );
     
-    return { status };
+    return { status, count };
   }));
   
   // console.log({"agg": aggreagateStatuses(statuses.map(s => s.status))});
   
-  return aggreagateStatuses(statuses.map(s => s.status));
+  return {
+    status: aggreagateStatuses(statuses.map(s => s.status)),
+    count: statuses.reduce((acc, x) => acc + x.count, 0)
+  }
 }
 
 async function updateTweets(twClient: Twitter, articles: Article[]) {
@@ -196,7 +253,8 @@ async function updateTweets(twClient: Twitter, articles: Article[]) {
   }));
   
   return {
-    status: aggreagateStatuses(results.map(r => r.status))
+    status: aggreagateStatuses(results.map(r => r.status)),
+    count: results.reduce((acc, x) => acc + x.tweetCount, 0)
   };
 }
 
@@ -204,7 +262,8 @@ async function updateTweets(twClient: Twitter, articles: Article[]) {
 export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
   title: string;
   maxPubDate: Date;
-  status: SearchApiStatus
+  status: SearchApiStatus;
+  count: number;
 }> {
   //キューに貯めるとかしたほうがいい？ => しかし、実装が大変。。。いったん、何も考えずに実装！
   //
@@ -247,18 +306,19 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
   }));
   
   return { title, maxPubDate,
-    status: aggreagateStatuses(results.map(r => r.status))
+    status: aggreagateStatuses(results.map(r => r.status)),
+    count: createdArticles.length
   };
 }
 
 export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting, articleTitle: string): Promise<{ status: SearchApiStatus, tweets: TweetType[], tweetCount: number }> {
   const { status, tweets } = await searchAllTweets(qSet, twClient);
   
-  console.log({TT: {status, tweets }});
+  // console.log({TT: {status, tweets }});
     
   const processed = ProcessTweetsMain(tweets, articleTitle);
   
-  console.log({processed: processed});
+  // console.log({processed: processed});
   
   return {
     status: status,

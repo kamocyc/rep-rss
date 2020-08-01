@@ -1,6 +1,7 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState, useContext } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { AppNavBar } from './AppNavBar';
+import { ArticleUpdateContext } from './article-update-context';
 
 type Rss = {
   url: string 
@@ -45,6 +46,7 @@ const rssReducer: RssResucerType = (rsses, action) => {
 
 const useRender = (getEndpoint: string, updateEndpoint: string) => {
   const [rsses, dispatch] = useReducer(rssReducer, []);
+  const { dispatch: articleUpdateDispatch } = useContext(ArticleUpdateContext);
   const isFirstRender = useRef(true);
   const isServerChange = useRef(false);
   
@@ -77,6 +79,7 @@ const useRender = (getEndpoint: string, updateEndpoint: string) => {
       .then(init => {
         isServerChange.current = true;
         dispatch(initRss(init.rsses));
+        articleUpdateDispatch({type: 'UPDATE'});
       });
     }
   }, [getEndpoint, updateEndpoint, rsses]);
@@ -155,7 +158,7 @@ const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>
   );
 };
 
-export const RssEditPage = ()=> {
+export const RssEditPage = () => {
   const {rsses, dispatch} = useRender('/api/rss_get', '/api/rss_update');
   
   return (

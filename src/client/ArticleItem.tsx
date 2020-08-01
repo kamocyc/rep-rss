@@ -10,7 +10,7 @@ function processArticleLink(link: string): string {
 export const ArticleItem = ({ article, isList } : { index: number, article: ArticleType, isList: boolean }) => {
   const articleTitle = isList ? (
     <p className="article-title">
-      <Link to={"/comment/" + article.articleId}>{article.title}</Link>
+      <Link to={`/comment/${article.articleId}`}>{article.title}</Link>
     </p>
   ) : (
     <p className="article-title-for-sub">

@@ -6,7 +6,7 @@ import User from './models/user';
 export function registerRss(app: Express) {
   app.get('/api/rss_get', async function (req, res) {
     if(req.isAuthenticated()) {
-      const user = await User.findByPk(req.user ? (req.user as LoginUser).id : undefined);
+      const user = await User.findByPk((req.user as LoginUser).id);
       if(user === null) {
         res.json({ 'status': 'not_logged_in', articles: [] });
         return;
@@ -32,9 +32,9 @@ export function registerRss(app: Express) {
   });
 
   app.post('/api/rss_update', async function (req, res) {
-    if(req.isAuthenticated()) {
+    if(req.isAuthenticated() && req.user) {
       {
-        const user = await User.findByPk(req.user ? (req.user as LoginUser).id : undefined,
+        const user = await User.findByPk((req.user as LoginUser).id,
           {
             include: [ Rss ]
           });
@@ -53,6 +53,7 @@ export function registerRss(app: Express) {
         const dbRssUrls = new Set(dbRsses.map(rss => rss.url));
         const reqRssUrls = new Set(reqRsses.map(rss => rss.url));
         
+        //他の人のRSSに載せるのもやりたいが、そうすると更新のステータス表示がまた工夫が必要になる
         //これをもうちょっとどうにかしたいところ
         //DBから毎回全権取得はまあしかたない。
         //bulk insertなどするか

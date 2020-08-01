@@ -12,6 +12,7 @@ export default class Article extends Model {
   public count_twitter!: number | null;
   public count_twitter_updated!: Date | null;
   public pubDate!: Date;
+  public updatingLockUntil!: Date;
 }
 
 Article.init({
@@ -51,8 +52,13 @@ Article.init({
   pubDate: {
     type: DataTypes.DATE,
     allowNull: false,
-  }
+  },
+  updatingLockUntil: {
+    type: DataTypes.DATE,
+  },
 },
 {
+  tableName: "Articles",
+  modelName: "Article",
   sequelize
 });

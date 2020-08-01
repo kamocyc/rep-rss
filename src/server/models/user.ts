@@ -30,5 +30,7 @@ User.init({
   }
 },
 {
+  tableName: "Users",
+  modelName: "User",
   sequelize, // passing the `sequelize` instance is required
 });

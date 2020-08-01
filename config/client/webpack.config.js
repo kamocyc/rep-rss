@@ -51,20 +51,10 @@ module.exports = merge({
     index: '',
     proxy: {
       '**': {
-        target: 'http://192.168.0.10:3000',
+        target: 'http://127.0.0.1:3000',
         secure: false,
         logLevel: 'debug'
       },
-      // '/api/**': {
-      //   target: 'http://192.168.0.10:3000',
-      //   secure: false,
-      //   logLevel: 'debug'
-      // },
-      // '/auth/**': {
-      //   target: 'http://192.168.0.10:3000',
-      //   secure: false,
-      //   logLevel: 'debug'
-      // }
     },
   }
 }); 

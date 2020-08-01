@@ -20,9 +20,9 @@ import { LoginUser }from './common';
 
 
 (async () => {
-  User.belongsToMany(Rss, { through: 'User_Rsses' });
+  User.belongsToMany(Rss, { through: `${User.tableName}_${Rss.tableName}` });
   
-  Rss.belongsToMany(User, { through: 'User_Rsses' });
+  Rss.belongsToMany(User, { through: `${User.tableName}_${Rss.tableName}` });
   Rss.hasMany(Article, { foreignKey: 'rssId' });
   
   Article.belongsTo(Rss, { foreignKey: 'rssId', onDelete: "CASCADE" });
@@ -78,9 +78,9 @@ app.get('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
     //DB内の任意のユーザのデータを用いる必要がある？
     //まずは、ログイン後に手動で更新で、
     if(req.user !== undefined) {
-      await updateAll((req.user as LoginUser).id);
+      const { status, count } = await updateAll((req.user as LoginUser).id);
       
-      res.json({ status: "ok" });
+      res.json({ status: "ok", apiStatus: status, count: count });
     } else {
       res.json(req.session);
     }
@@ -94,9 +94,9 @@ app.get('/api/update_tweet/',
       const sinceDayMinus = req.query.since_day_minus ? parseInt(req.query.since_day_minus as string) : 1;
       const lastElapsed = req.query.last_elapsed ? parseInt(req.query.last_elapsed as string) : 15;
       
-      updateTweetsEntry((req.user as LoginUser).id, pointLowerBound, sinceDayMinus, lastElapsed);
+      const { status, count } = await updateTweetsEntry((req.user as LoginUser).id, pointLowerBound, sinceDayMinus, lastElapsed);
       
-      res.json({ status: "ok" });
+      res.json({ status: "ok", apiStatus: status, count: count });
     } else {
       res.json(req.session);
     }

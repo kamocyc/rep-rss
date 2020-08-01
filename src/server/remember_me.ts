@@ -64,6 +64,8 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
         rememberToken: rememberToken
       }
     }).then(users => {
+      console.log("users: " + users.length);
+      
       for(const i in users) {
         console.log("user found!");
         
@@ -95,9 +97,13 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
         //console.log({hash, verifyingHash});
       }
       
+      console.log("user not found");
+      next();
       //res.redirect(302, '/login');
     });
   } else {
+    console.log("no token");
+    next();
     //res.redirect(302, '/login');
   }
 };

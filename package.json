@@ -48,6 +48,7 @@
     "css-loader": "^3.6.0",
     "eslint": "^7.5.0",
     "eslint-plugin-react": "^7.20.5",
+    "eslint-plugin-react-hooks": "^4.0.8",
     "html-webpack-plugin": "^4.3.0",
     "jest": "^26.1.0",
     "nodemon": "^2.0.4",
@@ -71,10 +72,8 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "helmet": "^3.23.3",
-    "longest-common-subsequence": "^1.0.4",
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
-    "passport-remember-me": "^0.0.1",
     "passport-twitter": "^1.0.4",
     "pg": "^8.3.0",
     "pg-hstore": "^2.3.3",
@@ -85,7 +84,6 @@
     "rss-parser": "^3.9.0",
     "sequelize": "^6.3.3",
     "serve-favicon": "^2.5.0",
-    "string-similarity": "^4.0.1",
     "striptags": "^3.1.1",
     "twitter-lite": "^0.14.0"
   },
@@ -104,6 +102,6 @@
     ]
   },
   "engines": {
-    "node": "~10"
+    "node": "~12"
   }
 }

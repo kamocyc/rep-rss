@@ -32,7 +32,7 @@ export async function searchAllTweets(qSet: QuerySetting, twClient: Twitter): Pr
     }
     
     if(qSet.since !== undefined) {
-      params.q = params.q + " since:" + formatDate(qSet.since) + "_" + formatTime(qSet.since) + "_UTC";
+      params.q = `${params.q} since:${formatDate(qSet.since)}_${formatTime(qSet.since)}_UTC`;
     }
     
     console.log({queryString: params.q});
