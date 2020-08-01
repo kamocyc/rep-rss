@@ -18,7 +18,6 @@ import { authMiddleware, registerRememberMe } from './remember_me';
 import { registerRss } from './rss';
 import { LoginUser }from './common';
 
-
 (async () => {
   User.belongsToMany(Rss, { through: `${User.tableName}_${Rss.tableName}` });
   
@@ -148,48 +147,6 @@ app.post('/api/logout', function (req, res) {
   }
 });
 
-// app.get('/api/aa', (req, res) => {
-//   res.cookie('aaa', 'ccc');
-//   res.send({api: 'test'});
-// });
-
-// app.get('/api/a', (req, res) => {
-//   res.cookie('aaa', '');
-//   res.clearCookie('aaa');
-//   res.header('Access-Control-Allow-Credentials','true');
-//   res.send({api: 'test'});
-// });
-
-// app.get('/api/b', (req, res) => {
-//   res.cookie('aaa', 'bbb');
-//   res.header('Access-Control-Allow-Credentials','true');
-//   res.send({api: 'test'});
-// });
-
-// app.get('/api/c', (req, res) => {
-//   res.cookie('aaa', '');
-//   res.clearCookie('aaa');
-  
-//   req.logout();
-  
-//   res.header('Access-Control-Allow-Credentials','true');
-//   res.send({api: 'test'});
-// });
-
-// app.get('/api/d', (req, res) => {
-//   res.cookie('aaa', '');
-//   res.clearCookie('aaa');
-  
-//   req.logout();
-  
-//   if(req.session!== undefined) {
-//     req.session.destroy((err) => {
-//       res.send({api: 'test'});
-//     });
-//   }
-// });
-
-
 app.get('*', function (req, res) {
   console.log({send_file: "send file"});
   console.log({isAuthenticated: req.isAuthenticated()});
@@ -197,4 +154,3 @@ app.get('*', function (req, res) {
 
   res.sendFile('./index.html', { root: path.join('./', 'dist', 'client') });
 });
-//path.join('./', 'dist', 'client')

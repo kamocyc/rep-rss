@@ -4,8 +4,8 @@ export const tr = (key: string): string => {
     'please_wait': {en: 'Please wait ...', ja: 'お待ちください ...'},
     'please_login': {en: 'Please login', ja: 'ログインしてください'},
     'app_description':
-      {en: 'This App retrieves comments on articles from Twitter and display them after you register RSS feeds.',
-      ja: '登録したRSSフィードの記事に対するコメントをTwitterから取得して表示するアプリです。'},
+      {en: 'This App display articles in RSS feeds in order of their number of tweets.',
+      ja: 'RSSフィードの記事を、そのツイート数順に表示するアプリです。'},
     'loading': {en: 'Loading ...', ja: '読み込み中 ...'},
     'updating_rss_feeds': {en: 'Updating RSS feeds ...', ja: 'RSSフィードを更新しています ...'},
     'subscribe_rss_feeds':

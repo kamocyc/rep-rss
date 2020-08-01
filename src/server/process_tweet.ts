@@ -6,17 +6,6 @@ export function ProcessTweetsMain(tweets: TweetStatus[], articleTitle: string): 
     // remove RTs
     const {commentTweets} = filterComments(allTweets, articleTitle);
     
-    // if(removedTweets.length > 0) {
-    //   try {
-    //     const fs = require('fs');
-        
-    //     let data = JSON.stringify(removedTweets);
-    //     fs.writeFileSync('../removed_' + removedTweets[0].tweetOriginalId + '.json', data);
-    //   } catch(e) {
-    //     console.error({fileerror: e});
-    //   }
-    // }
-    
     const tweetCount = allTweets.length;
   
     return {
@@ -121,15 +110,6 @@ function filterComments(tweets_: TweetType[], title: string) {
   tweets2.sort((a, b) => a.tweetOriginalId < b.tweetOriginalId ? 1 : -1);
   
   const removedTweets = tweets_.filter(t => tweets2.filter(tt => tt.tweetOriginalId === t.tweetOriginalId).length === 0);
-  
-  // try {
-  //   const fs = require('fs');
-    
-  //   let data = JSON.stringify(reds);
-  //   fs.writeFileSync('../reds_' + tweets_[0].tweetOriginalId + '.json', data);
-  // } catch(e) {
-  //   console.error({fileerror: e});
-  // }
   
   return { commentTweets: tweets2, removedTweets: removedTweets };
 }

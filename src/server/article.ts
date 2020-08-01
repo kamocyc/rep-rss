@@ -60,6 +60,7 @@ export function registerArticle(app: Express) {
                   attributes: {
                     include: [
                       [
+                        //日次の引き算はinterval型、それを整数に変換するにはextractを使う。
                         Sequelize.literal(`(${rssArticles}."point" - extract(epoch from NOW() - ${rssArticles}."pubDate") / 60 / 10)`),
                         'calculatedPoint'
                       ],
@@ -88,15 +89,6 @@ export function registerArticle(app: Express) {
           return;
         }
 
-        //日次の引き算はinterval型、それを整数に変換するにはextractを使う。
-        // const rsses = (await (user as any).getRsses()) as Rss[];
-        // const articles = await rsses.getArticles({
-        //   limit: TOP_COUNT,
-        //   order: [[Sequelize.literal("(point - extract(epoch from NOW() - \"pubDate\") / 60 / 20)"), 'DESC']],
-        // }) as Article[];
-        
-        // console.dir(user, { depth: 10});
-        
         const articles = flatten(((user as any).Rsses as Rss[]).map(r => (r as any).Articles as Article[]));
         
         if(articles.length === 0) {

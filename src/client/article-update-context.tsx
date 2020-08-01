@@ -1,8 +1,8 @@
-import React, { useReducer, createContext, Dispatch, useContext, useState, useEffect } from "react";
+import React, { createContext, Dispatch, useContext, useEffect, useReducer } from "react";
+import { ArticleType } from './common';
 import './css/custom.css';
 import { GlobalContext } from './login-context';
 import { useDataApi } from './useDataApi';
-import { ArticleType } from './common';
 
 interface ArticleUpdateContextType {
   isUpdating: boolean;
@@ -80,6 +80,7 @@ export const ArticleUpdateContextProvider = (props: any) => {
   
   useEffect(() => {
     console.log({articleDataState: articleDataState})
+    articleDataState.data.articles.sort((a, b) => b.calculatedPoint - a.calculatedPoint);
     dispatch({type: '__SET_ARTICLES', articleData: articleDataState.data});
   }, [articleDataState]);
   
@@ -113,7 +114,8 @@ export const ArticleUpdateContextProvider = (props: any) => {
           }
         );
         
-        const { count: count1 } = await res1.json();
+        const { /*count: count1,*/ status: status1 } = await res1.json();
+        if(status1 !== 'ok') { console.warn('update 1 error: ' + status1); }
         // setArticleUpdateState({status: 'wait_update_tweet'});
         
         const res2 = await fetch('/api/update_tweet/', {
@@ -125,11 +127,12 @@ export const ArticleUpdateContextProvider = (props: any) => {
           }
         );
         
-        const { count: count2 } = await res2.json();
+        const { /*count: count2, */ status: status2 } = await res2.json();
+        if(status2 !== 'ok') { console.warn('update 2 error: ' + status2); }
         // setArticleUpdateState({status: 'wait_article_clean'});
         // if(count1 + count2 > 0) {
-          //reloadする
-          dispatch({type: 'RELOAD'});
+        //reloadする
+        dispatch({type: 'RELOAD'});
         // }
         
         const res3 = await fetch('/api/article_clean/', {
@@ -139,6 +142,9 @@ export const ArticleUpdateContextProvider = (props: any) => {
             },
             credentials: 'include',
         })
+        
+        const { /*count: count3, */ status: status3 } = await res3.json();
+        if(status3 !== 'ok') { console.warn('update 3 error: ' + status3); }
         
         // // setArticleUpdateState({status: 'done'});
         
@@ -151,102 +157,3 @@ export const ArticleUpdateContextProvider = (props: any) => {
   
   return <ArticleUpdateContext.Provider value={{state, dispatch}}>{props.children}</ArticleUpdateContext.Provider>;
 }
-
-// export const useArticle = < T extends {} >(initialUpdateObject: T) => {
-//   const listApiEndpoint = '/api/article_get';
-//   const { state: loginState } = useContext(GlobalContext);
-//   const [ updateObject, checkUpdateObject] = useState(initialUpdateObject);
-//   const [ articleUpdateState, setArticleUpdateState ] = useState({status: "uninitialized"});
-//   // const { state: articleUpdateState, dispatch:articleUpdateDispatch } = useContext(ArticleUpdateContext);
-//   //articleのreloadのタイミング
-//   const { state: articleDataState, checkData, setCheckData } = useDataApi<{ articles: ArticleType[], status: string }, {userName: string | undefined, count: number}>(listApiEndpoint, { method: 'GET' }, {userName: loginState.userName, count: 0}, { articles: [], status: "uninitialized" });
-  
-//   //articleのDBのupdate
-//   //これが発生するのは、userNameの更新の時とRSSリストの更新のとき。
-//   //更新状態のstatusをどこからかアクセスしたい
-//   useEffect(() => {
-//     (async () => {
-//       setArticleUpdateState({status: 'wait_update_article'});
-      
-//       const res1 = await fetch('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6', {
-//           method: 'GET',
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           credentials: 'include',
-//         }
-//       );
-      
-//       const { count: count1 } = await res1.json();
-//       setArticleUpdateState({status: 'wait_update_tweet'});
-      
-//       const res2 = await fetch('/api/update_tweet/', {
-//           method: 'GET',
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           credentials: 'include',
-//         }
-//       );
-      
-//       const { count: count2 } = await res2.json();
-//       setArticleUpdateState({status: 'wait_article_clean'});
-//       if(count1 + count2 > 0) {
-//         //reloadする
-//         setCheckData({ ...checkData, count: checkData.count + 1 });
-//       }
-      
-//       const res3 = await fetch('/api/article_clean/', {
-//           method: 'POST',
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           credentials: 'include',
-//       })
-      
-//       setArticleUpdateState({status: 'done'});
-      
-//       return [res1, res2, res3];
-//     })();
-    
-//   }, [loginState.userName, updateObject]);
-  
-//   return { articleDataState, articleUpdateState, checkUpdateObject };
-// }
-
-// const reducer = (state: ArticleUpdateState, action: ArticleUpdateAction): ArticleUpdateState => {
-//   if(action.type === 'RELOAD') {
-//     fetch(listApiEndpoint)
-//     .then(res => res.json())
-//     .then((list: { articles: ArticleType[], status: string }) => {
-//       list.articles.sort((a, b) => b.calculatedPoint - a.calculatedPoint);
-//       console.log({"list": list});
-//       setArticles(list);
-//     });
-    
-//     return {
-//       status: "reloading",
-//       articles: state.articles
-//     };
-//   } else if(action.type === 'UPDATE') {
-    
-//   }
-//   return {
-//     status: action.action,
-//     pendingRefresh: action.pendingRefresh ?? state.pendingRefresh
-//   };
-// };
-
-// export const ArticleUpdateContextProvider = (props: any) => {
-//   const [state, dispatch] = useReducer(reducer, initState);
-  
-//   return <ArticleUpdateContext.Provider value={{state, dispatch}}>{props.children}</ArticleUpdateContext.Provider>
-// }
-
-
-// function updateRss(next: ((reason: any) => void)) {
-//   // const {dispatch} = useContext(ArticleUpdateContext);
-  
-// }
-  
-  

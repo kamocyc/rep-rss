@@ -87,7 +87,7 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
                 console.log("logged in!");
                 console.log({err: err});
                 
-                // セキュリティ的はここで remember_me を再度更新すべき
+                // TODO: セキュリティ的はここで remember_me を再度更新すべき
                 next();
               });
             // });
@@ -111,17 +111,13 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
 /////
 export function registerRememberMe(passport: PassportStatic) {
   passport.serializeUser(function (user, done) {
-    // console.log({ser_user: user});
     done(null, user);
   });
 
   passport.deserializeUser(function (obj, done) {
-    // console.log({des_user: obj});
-    // console.log({"a": process.env.NODE_ENV });
     done(null, obj);
   });
 
-  //TODO: 暗号化してTOKENを保存
   passport.use(new TwitterStrategy({
     consumerKey: consumerKey,
     consumerSecret: consumerSecret,
@@ -139,7 +135,6 @@ export function registerRememberMe(passport: PassportStatic) {
 
 function processTwitterLogin(req: any, token: string, tokenSecret: string, userId: string, username: string, fullprofile: any, done: (error: any, user?: any) => void) {
   console.log("processTwitterLogin");
-  // console.log(req.session);
   
   const rememberToken = crypto.randomBytes(20).toString('hex');
   const hash = crypto.createHmac('sha256', APP_HASH_KEY)

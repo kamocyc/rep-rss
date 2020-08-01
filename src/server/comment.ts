@@ -6,10 +6,8 @@ export function registerComment(app: Express) {
   app.get('/api/comment_get',
     async (req, res) => {
       try {
-        //console.log({articleId: req.query.articleId});
         const article = await Article.findByPk(req.query.articleId as string, { include: Tweet });
         if(article === null) throw new Error("Illegal article id");
-        //console.dir({article: article }, {depth: 10});
         
         const tweets = (article as any).Tweets as Tweet[];
         
