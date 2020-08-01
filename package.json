@@ -7,6 +7,7 @@
     "build_client": "webpack --config ./config/client/webpack.config.js --mode development",
     "build_server": "webpack --config ./config/server/webpack.config.js --mode development",
     "build_production": "webpack --config ./config/client/webpack.config.js --mode production && webpack --config ./config/server/webpack.config.js --mode production",
+    "heroku-postbuild": "yarn run build_production",
     "start": "NODE_ENV=production yarn run build && yarn run server",
     "test": "npx jest --testTimeout=10000"
   },

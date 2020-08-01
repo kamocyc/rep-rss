@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useRef, useState, useContext } from "reac
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { AppNavBar } from './AppNavBar';
 import { ArticleUpdateContext } from './article-update-context';
+import { tr } from './i18n';
 
 type Rss = {
   url: string 
@@ -92,7 +93,7 @@ const Rss = ({ rss, index, dispatch }: { rss: Rss, index: number, dispatch: Reac
     <li>
       <Row className="rss-row">
         <Col sm={11}>{ rss.url }</Col>
-        <Col sm={1}><Button type="button" variant="danger" onClick={() => dispatch(removeRss(index))}>Delete</Button></Col>
+        <Col sm={1}><Button type="button" variant="danger" onClick={() => dispatch(removeRss(index))}>{tr('delete')}</Button></Col>
       </Row>
     </li>
   );
@@ -125,13 +126,13 @@ const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>
     e.preventDefault();
     if(!rssUrl) return;
     if(!isUrlLike(rssUrl)) {
-      alert("Illegal URL!!");
+      alert(tr("illegal_url"));
       return;
     }
     
     //重複の簡易検査
     if(rsses.find(rss => rss.url.toLowerCase() === rssUrl.toLowerCase()) !== undefined) {
-      alert("Duplicated!!");
+      alert(tr("duplicated"));
       return;
     }
 
@@ -145,13 +146,13 @@ const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>
         <Col sm={10}>
           <Form.Control 
             type="text"
-            placeholder="Enter RSS URL"
+            placeholder={tr('enter_rss_url')}
             value={rssUrl}
             onChange={e => setRssUrl(e.target.value)}
           />
         </Col>
         <Col sm={2}>
-          <Button type="submit">Add RSS</Button>
+          <Button type="submit">{tr("add_rss")}</Button>
         </Col>
       </Form.Row>
     </Form>

@@ -10,6 +10,7 @@ import { ArticleList } from './ArticleList';
 import './css/custom.css';
 import { GlobalContext, GlobalContextProvider } from './login-context';
 import { RssEditPage } from './RssEdit';
+import { tr } from './i18n';
 
 // function SearchPage() {
 //   return (
@@ -26,7 +27,7 @@ const ProgressBar = ({ articleUpdateState } : { articleUpdateState: boolean }) =
     // case 'wait_update_article':
     // case 'wait_update_tweet':
     case true:
-      return (<div className="progress-bar">Updating...</div>);
+      return (<div className="progress-bar">{tr('updating_rss_feeds')}</div>);
     default:
       return (<div className="progress-bar done-progress-bar">&nbsp;</div>);
   }
@@ -36,8 +37,8 @@ export const LoginPage = () => {
   const { state } = useContext(GlobalContext);
   
   const loginButton = state.userName !== undefined ?
-    (<Alert variant="warning">You are already logged in!</Alert>) :
-    (<Button href="/auth/twitter" className="login-link-button">Login with Twitter</Button>);
+    (<Alert variant="warning">{tr("you_are_already_logged_in")}</Alert>) :
+    (<Button href="/auth/twitter" className="login-link-button">{tr("login_with_twitter")}</Button>);
     
   return (
     <div>
@@ -48,7 +49,7 @@ export const LoginPage = () => {
         <Col sm={2}> </Col>
       </Row>
       <Row>
-        <Link to="/">Back</Link>
+        <Link to="/">{tr("back")}</Link>
       </Row>
     </div>
   );
@@ -66,12 +67,12 @@ const TopPage = () => {
   };
   
   const mainContent =
-    !loginState.initialized ? message("Please wait ...") :
-    loginState.userName === undefined ? message("Please login") :
-    articleData.status === 'not_logged_in' || articleData.status === 'uninitialized' ? message("Loading ...") : 
-    articleData.articles.length === 0 && articleState.isUpdating ? message('Updating...') :
-    articleData.status === 'no_rss' ? message('Please subscribe RSS feeds with "Edit RSS" link above') :
-    articleData.articles.length === 0 ? message('No articles') :
+    !loginState.initialized ? message(tr("please_wait")) :
+    loginState.userName === undefined ? (<>{message(tr("please_login"))}{<p className="app-description">{tr('app_description')}</p>}</>) :
+    articleData.status === 'not_logged_in' || articleData.status === 'uninitialized' ? message(tr("loading")) : 
+    articleData.articles.length === 0 && articleState.isUpdating ? message(tr('updating_rss_feeds')) :
+    articleData.status === 'no_rss' ? message(tr('subscribe_rss_feeds')) :
+    articleData.articles.length === 0 ? message(tr('no_articles')) :
     (<ArticleList articles={articleData.articles} />);
     
   return (

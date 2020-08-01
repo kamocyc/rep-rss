@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react";
 import { Nav, Navbar } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import { GlobalContext } from './login-context';
+import { tr } from './i18n';
 // import { updateRss } from './common';
 
 export const AppNavBar = () => {
@@ -70,8 +71,8 @@ export const AppNavBar = () => {
   // };
   
   const loginOutLink = state.userName !== undefined ?
-    (<Nav.Link onClick={() => handleLogout()} style={{display: "inline", wordBreak: 'break-all'}}>Logout</Nav.Link>) :
-    (<Nav.Link as={Link} to="/login" style={{display: "inline"}}>Login</Nav.Link>);  
+    (<Nav.Link onClick={() => handleLogout()} style={{display: "inline", wordBreak: 'break-all'}}>{tr("logout")}</Nav.Link>) :
+    (<Nav.Link as={Link} to="/login" style={{display: "inline"}}>{tr('login')}</Nav.Link>);  
   
   //console.log(state);
   //Navでカレントがactiveにならないのをどうにかしたい
@@ -80,7 +81,7 @@ export const AppNavBar = () => {
     <Navbar bg="light" variant="light">
       <Navbar.Brand as={Link} to='/'>Rep RSS</Navbar.Brand>
       <Nav className="mr-auto">
-        <Nav.Link as={Link} to='/edit_rss'>Edit RSS</Nav.Link>
+        {state.userName === undefined ? (<></>) : (<Nav.Link as={Link} to='/edit_rss'>{tr("edit_rss")}</Nav.Link>)}
         {/* <Nav.Link onClick={handleUpdateRss} disabled={updateButtonState}>(Beta) Update RSS</Nav.Link> */}
       </Nav>
       <div>
