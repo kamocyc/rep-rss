@@ -3,6 +3,7 @@ import { ArticleType } from './common';
 import './css/custom.css';
 import { GlobalContext } from './login-context';
 import { useDataApi } from './useDataApi';
+import { tr } from './i18n';
 
 interface ArticleUpdateContextType {
   isUpdating: boolean;
@@ -116,7 +117,16 @@ export const ArticleUpdateContextProvider = (props: any) => {
         
         const { /*count: count1,*/ status: status1, apiStatus: apiStatus1 } = await res1.json();
         if(status1 !== 'ok') { console.warn('update 1 error: ' + status1); }
-        if(apiStatus1 !== 'ok') { console.warn('update 1 API error: ' + apiStatus1); }
+        if(apiStatus1 !== 'ok') {
+          console.warn('update 1 API error: ' + apiStatus1);
+          if(apiStatus1 === 'rate_limit') {
+            alert(tr("twitter_rate_limit"));
+            dispatch({type: 'RELOAD'});
+            dispatch({type: '__FINISH_UPDATING'});
+            return;
+          }
+        }
+        
         // setArticleUpdateState({status: 'wait_update_tweet'});
         
         const res2 = await fetch('/api/update_tweet/', {
@@ -130,7 +140,17 @@ export const ArticleUpdateContextProvider = (props: any) => {
         
         const { /*count: count2, */ status: status2, apiStatus: apiStatus2 } = await res2.json();
         if(status2 !== 'ok') { console.error('update 2 error: ' + status2); }
-        if(apiStatus2 !== 'ok') { console.warn('update 2 API error: ' + apiStatus2); }
+        if(apiStatus2 !== 'ok') {
+          console.warn('update 2 API error: ' + apiStatus2);
+          
+          if(apiStatus2 === 'rate_limit') {
+            alert(tr("twitter_rate_limit"));
+            dispatch({type: 'RELOAD'});
+            dispatch({type: '__FINISH_UPDATING'});
+            return;
+          }
+        }
+        
         // setArticleUpdateState({status: 'wait_article_clean'});
         // if(count1 + count2 > 0) {
         //reloadする

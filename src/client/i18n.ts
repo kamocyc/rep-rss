@@ -28,6 +28,7 @@ export const tr = (key: string): string => {
     'minute': {en: 'minute', ja: '分'},
     'hour': {en: 'hour', ja: '時間'},
     'day': {en: 'day', ja: '日'},
+    'twitter_rate_limit': {en: 'Twitter API rate limit. Please reload page after 15 minutes', ja: 'Twitter APIの制限を超えました。15分以上待ってからページを更新してください。'},
   };
   
   if(dict[key] === undefined) {
