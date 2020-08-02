@@ -200,7 +200,7 @@ async function updateRsses(twClient: Twitter, rsses: Rss[]) {
     await Rss.update(
       {
         title: title,
-        maxPubDate: maxPubDate
+        maxPubDate: maxPubDate ?? rss.maxPubDate
       },
       {
         where: {
@@ -272,7 +272,7 @@ async function updateTweets(twClient: Twitter, articles: Article[]): Promise<{
 
 export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
   title: string;
-  maxPubDate: Date;
+  maxPubDate: Date | undefined;
   status: SearchApiStatus;
   count: number;
 }> {
@@ -334,7 +334,7 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
   
   return {
     title,
-    maxPubDate,
+    maxPubDate: maxPubDate.getFullYear() == 1980 ? undefined : maxPubDate,
     status: aggreagateStatuses(results.map(r => r.status)),
     count: createdArticles.length
   };
@@ -366,7 +366,6 @@ export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting
 
 async function updateArticles(rss: RssType): Promise<{
     title: string;
-    maxPubDate: Date;
     createdArticles: {
       articleId: number;
       link: string;
@@ -392,14 +391,7 @@ async function updateArticles(rss: RssType): Promise<{
     return {articleId: created.articleId, link: article.link, articleTitle: article.title ?? "", pubDate: article.pubDate};
   }));
   
-  let maxPubDate = rss.maxPubDate !== undefined ? rss.maxPubDate : new Date('1980-01-01');
-  articles.forEach(a => {
-    if(a.pubDate > maxPubDate) {
-      maxPubDate = a.pubDate;
-    }
-  });
-  
-  return {title: title ?? "", maxPubDate, createdArticles};
+  return {title: title ?? "", createdArticles};
 }
 
 export async function getArticles(url: string): Promise<{articles: ArticleType[], title?: string}> {
