@@ -42,7 +42,6 @@ export async function searchAllTweets(qSet: QuerySetting, twClient: Twitter): Pr
     try {
       results = (await twClient.get("search/tweets", params)) as TweetObject;
     } catch (e) {
-      console.error({"error": e});
       if ('errors' in e) {
         if(e.errors[0].code == 88) {
           console.log("Rate limit will reset on", new Date(e._headers.get("x-rate-limit-reset") * 1000));
@@ -53,6 +52,7 @@ export async function searchAllTweets(qSet: QuerySetting, twClient: Twitter): Pr
           };
         }
       }
+      console.error({"error": e});
       
       return {
         status: "error",

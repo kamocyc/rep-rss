@@ -43,8 +43,8 @@ type RssType = {
 };
 
 function aggreagateStatuses(statuses: SearchApiStatus[]): SearchApiStatus {
-  return statuses.filter(r => r === 'error').length > 0 ? 'error' :
-            (statuses.filter(r => r === 'rate_limit').length > 0 ? 'rate_limit' : 'ok')
+  return statuses.filter(r => r === 'rate_limit').length > 0 ? 'rate_limit' :
+            (statuses.filter(r => r === 'error').length > 0 ? 'error' : 'ok')
 }
 
 async function getUserAndToken(userId: string, options: any) {
@@ -212,7 +212,8 @@ async function updateRsses(twClient: Twitter, rsses: Rss[]) {
     return { status, count };
   }));
   
-  // console.log({"agg": aggreagateStatuses(statuses.map(s => s.status))});
+  console.log({"agg": statuses.map(s => s.status)});
+  console.log({"agg": aggreagateStatuses(statuses.map(s => s.status))});
   
   return {
     status: aggreagateStatuses(statuses.map(s => s.status)),
@@ -220,7 +221,10 @@ async function updateRsses(twClient: Twitter, rsses: Rss[]) {
   }
 }
 
-async function updateTweets(twClient: Twitter, articles: Article[]) {
+async function updateTweets(twClient: Twitter, articles: Article[]): Promise<{
+    status: SearchApiStatus;
+    count: number;
+}> {
   const updateDate = new Date();
   
   const results = await Promise.all(articles.map(async (article) => {
@@ -231,6 +235,13 @@ async function updateTweets(twClient: Twitter, articles: Article[]) {
     };
     
     const {tweets, tweetCount, status} = await getTwitterReputation(twClient, qSet, article.title ?? "{{DUMMY}}");
+    
+    if(status !== 'ok') {
+      return {
+        tweetCount: 0,
+        status
+      }
+    }
     
     //insert
     const tweetsToInsert = tweets.map(t => ({...t, articleId: article.articleId}));
@@ -268,7 +279,7 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
 }> {
   //キューに貯めるとかしたほうがいい？ => しかし、実装が大変。。。いったん、何も考えずに実装！
   //
-  const {title, maxPubDate, createdArticles} = await updateArticles(rss);
+  const {title, createdArticles} = await updateArticles(rss);
   const updateDate = new Date();
   
   const results = await Promise.all(createdArticles.map(async (article) => {
@@ -280,6 +291,16 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
       };
       
       const {tweets, tweetCount, status} = await getTwitterReputation(twClient, qSet, article.articleTitle);
+      
+      console.log({updateRss: {status}});
+      
+      if(status !== 'ok') {
+        return {
+          tweetCount: 0,
+          status,
+          pubDate: article.pubDate
+        };
+      }
       
       //insert
       const tweetsToInsert = tweets.map(t => ({...t, articleId: article.articleId}));
@@ -299,12 +320,14 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
           }
         });
       
-      return { tweetCount, status };
+      return { tweetCount, status, pubDate: article.pubDate };
     } catch(error) {
       console.error(error);
-      return { tweetCount: -1, status: ('error' as SearchApiStatus) };
+      return { tweetCount: -1, status: ('error' as SearchApiStatus), pubDate: article.pubDate };
     }
   }));
+  
+  const maxPubDate = results.filter(r => r.status === 'ok').map(r => r.pubDate).reduce((acc, x) => acc < x ? x : acc, new Date('1980-01-01'));
   
   return { title, maxPubDate,
     status: aggreagateStatuses(results.map(r => r.status)),
@@ -314,9 +337,16 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
 
 export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting, articleTitle: string): Promise<{ status: SearchApiStatus, tweets: TweetType[], tweetCount: number }> {
   const { status: status1, tweets: tweets } = await searchAllTweets(qSet, twClient);
+  console.log({getTwitterReputation: {status1}});
   
-  // console.log({TT: {status, tweets }});
-    
+  if(status1 !== 'ok') {
+    return {
+      status: status1,
+      tweets: [],
+      tweetCount: 0
+    };
+  }
+  
   const processed = ProcessTweetsMain(tweets, articleTitle);
   // console.log({processed: processed});
   
@@ -336,6 +366,7 @@ async function updateArticles(rss: RssType): Promise<{
       articleId: number;
       link: string;
       articleTitle: string;
+      pubDate: Date;
     }[]}> {
   const {articles, title} = await getArticles(rss.url);
   
@@ -353,7 +384,7 @@ async function updateArticles(rss: RssType): Promise<{
       pubDate: article.pubDate
     });
     
-    return {articleId: created.articleId, link: article.link, articleTitle: article.title ?? ""};
+    return {articleId: created.articleId, link: article.link, articleTitle: article.title ?? "", pubDate: article.pubDate};
   }));
   
   let maxPubDate = rss.maxPubDate !== undefined ? rss.maxPubDate : new Date('1980-01-01');
