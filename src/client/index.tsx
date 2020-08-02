@@ -73,10 +73,19 @@ const TopPage = () => {
   
   const mainContent =
     !loginState.initialized ? message(tr("please_wait")) :
-    loginState.userName === undefined ? (<>{message(tr("please_login"))}{<p className="app-description">{tr('app_description')}</p>}{<p className="ga-agreement">{tr('ga_agreement')}</p>}</>) :
+    loginState.userName === undefined ? (
+      <>
+        {<p className="app-description">{tr('app_description')}</p>}
+        {<Button href="/auth/twitter" className="login-link-button login-link-button-top">{tr("login_with_twitter")}</Button>}
+        {<p className="ga-agreement">{tr('ga_agreement')}</p>}
+      </>) :
     articleData.status === 'not_logged_in' || articleData.status === 'uninitialized' ? message(tr("loading")) : 
     articleData.articles.length === 0 && articleState.isUpdating ? message(tr('updating_rss_feeds')) :
-    articleData.status === 'no_rss' ? message(tr('subscribe_rss_feeds')) :
+    articleData.status === 'no_rss' ? (
+      <>
+        {message(tr('subscribe_rss_feeds'))}
+        <p className="rss-example">{tr("subscribe_rss_feeds_eg")}</p>
+      </> ) :
     articleData.articles.length === 0 ? message(tr('no_articles')) :
     (<ArticleList articles={articleData.articles} />);
     

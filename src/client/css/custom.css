@@ -103,5 +103,14 @@
 } */
 
 .ga-agreement {
+  font-size: 80%;
+}
+
+.login-link-button-top {
+  margin: 10px;
+}
+
+.rss-example {
   font-size: 90%;
+  text-align: center;
 }

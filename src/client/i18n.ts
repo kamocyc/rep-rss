@@ -9,8 +9,11 @@ export const tr = (key: string): string => {
     'loading': {en: 'Loading ...', ja: '読み込み中 ...'},
     'updating_rss_feeds': {en: 'Updating RSS feeds ...', ja: 'RSSフィードを更新しています ...'},
     'subscribe_rss_feeds':
-      {en: `Please subscribe RSS feeds with "Edit RSS" link above`,
-       ja: `上の「RSSを編集」リンクからRSSフィードを登録してください`},
+      {en: `Please subscribe RSS feeds with "Edit RSS" link above.`,
+       ja: `上の「RSSを編集」リンクからRSSフィードを登録してください。`},
+    'subscribe_rss_feeds_eg':
+      {en: `(e.g. http://rss.cnn.com/rss/edition.rss )`,
+       ja: `(例: https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml )`},
     'no_articles': {en: 'No articles', ja: '記事がありません'},
     'login_with_twitter': {en: 'Login with Twitter', ja: 'Twitterでログイン'},
     'back': {en: 'Back', ja: '戻る'},
