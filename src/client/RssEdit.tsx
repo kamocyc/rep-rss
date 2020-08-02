@@ -92,8 +92,8 @@ const Rss = ({ rss, index, dispatch }: { rss: Rss, index: number, dispatch: Reac
   return (
     <li>
       <Row className="rss-row">
-        <Col sm={11}>{ rss.url }</Col>
-        <Col sm={1}><Button type="button" variant="danger" onClick={() => dispatch(removeRss(index))}>{tr('delete')}</Button></Col>
+        <Col sm={10} style={{wordBreak: "break-all"}}>{ rss.url }</Col>
+        <Col sm={2}><Button type="button" variant="danger" onClick={() => dispatch(removeRss(index))}>{tr('delete')}</Button></Col>
       </Row>
     </li>
   );

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { AppNavBar } from './AppNavBar';
 import { ArticleItem } from './ArticleItem';
 import { ArticleType, CommentType, getReadableInterval } from './common';
+import { tr } from './i18n';
 
 function getTweetUrl(userScreenName: string, tweetId: string): string {
   return `https://twitter.com/${userScreenName}/status/${tweetId}`;
@@ -36,7 +37,7 @@ export const CommentList = () => {
   const commentApiEndpoint = '/api/comment_get';
   const [comments, setComments] = useState<CommentType[]>([]);
   const [article, setArticle] = useState<ArticleType>({
-    articleId: 0,
+    articleId: -1,
     point: 0,
     title: "",
     link: "#",
@@ -62,7 +63,7 @@ export const CommentList = () => {
   return (
     <div>
       <AppNavBar />
-      <ArticleItem article={article} index={0} isList={false} />
+      {article.articleId === -1 ? (<>{tr("loading")}</>) : (<ArticleItem article={article} index={0} isList={false} />)}
       {comments.map((comment, index) => (
         <Comment index={index} key={index} comment={comment} />
       ))}
