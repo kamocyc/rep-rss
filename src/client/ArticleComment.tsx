@@ -14,17 +14,33 @@ function getTwitterUserUrl(userScreenName: string): string {
   return `https://twitter.com/${userScreenName}`;
 }
 
+function getHatebuUserUrl(userScreenName: string): string {
+  return `https://b.hatena.ne.jp/${userScreenName}/`;
+}
+
+function isHatebu(comment: CommentType) {
+  return comment.tweetOriginalId.substring(0, 3) === 'hb_';
+}
+
 const Comment = ({ comment } : { index: number, comment: CommentType }) => {
   const elapsed = getReadableInterval(new Date(), new Date(comment.date));
   
+  const commentElm = isHatebu(comment) ?
+    (<Row>
+      <span className="tweet-display-name"><a href={getHatebuUserUrl(comment.twScreenName)}>{comment.name}</a></span>
+      <span className="tweet-id-name"><a href={getHatebuUserUrl(comment.twScreenName)}>{`${comment.twScreenName}`}</a></span>
+      <span className="tweet-time"><a href={getHatebuUserUrl(comment.twScreenName)}>{elapsed}</a></span>
+    </Row>) :
+    (<Row>
+      <span className="tweet-display-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{comment.name}</a></span>
+      <span className="tweet-id-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{`@${comment.twScreenName}`}</a></span>
+      <span className="tweet-time"><a href={getTweetUrl(comment.twScreenName, comment.tweetOriginalId)}>{elapsed}</a></span>
+    </Row>);
+    
   return (
-    <Row className="comment-row">
+    <Row className={"comment-row" + (isHatebu(comment) ? '-hatebu' : '')}>
       <Container>
-        <Row>
-          <span className="tweet-display-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{comment.name}</a></span>
-          <span className="tweet-id-name"><a href={getTwitterUserUrl(comment.twScreenName)}>{`@${comment.twScreenName}`}</a></span>
-          <span className="tweet-time"><a href={getTweetUrl(comment.twScreenName, comment.tweetOriginalId)}>{elapsed}</a></span>
-        </Row>
+        {commentElm}
         <Row>{comment.text}</Row>
       </Container>
     </Row>

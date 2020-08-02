@@ -39,9 +39,11 @@ export function convertTweet(title: string, status: TweetStatus): TweetType {
 export interface TweetType {
   tweetOriginalId: string,
   twScreenName: string,
+  twProfileImage?: string,
   twName: string,
   twDate: Date,
   twText: string,
+  twOriginalText: string,
   twUrl: string,
   isRt?: boolean,
   isComment: boolean,

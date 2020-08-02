@@ -39,7 +39,6 @@ Tweet.init(
   },
   twProfileImage: {
     type: DataTypes.STRING,
-    allowNull: false
   },
   twName: {
     type: DataTypes.STRING,

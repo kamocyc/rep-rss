@@ -12,6 +12,7 @@ import { consumerKey, consumerSecret } from './secure_token';
 import { QuerySetting, searchAllTweets, SearchApiStatus } from './twitter_api';
 import { sequelize } from './models/sequelize-loader';
 import { Transaction } from 'sequelize';
+import { getHatenaBookmark } from './hatena_bookmark_api';
 
 //articleの最大長
 const ARTICLE_BODY_MAX = 255;
@@ -312,18 +313,19 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
 }
 
 export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting, articleTitle: string): Promise<{ status: SearchApiStatus, tweets: TweetType[], tweetCount: number }> {
-  const { status, tweets } = await searchAllTweets(qSet, twClient);
+  const { status: status1, tweets: tweets } = await searchAllTweets(qSet, twClient);
   
   // console.log({TT: {status, tweets }});
     
   const processed = ProcessTweetsMain(tweets, articleTitle);
-  
   // console.log({processed: processed});
   
+  const { status: status2, tweets: hatebu, count: bmCount } = await getHatenaBookmark(qSet);
+  
   return {
-    status: status,
-    tweets: processed.tweets,
-    tweetCount: processed.tweetCount
+    status: aggreagateStatuses([status1, status2]),
+    tweets: processed.tweets.concat(hatebu),
+    tweetCount: processed.tweetCount + bmCount
   };
 }
 
@@ -379,7 +381,7 @@ export async function getArticles(url: string): Promise<{articles: ArticleType[]
           content = content.substring(0, ARTICLE_BODY_MAX);
         }
         
-        console.log({item: item});
+        // console.log({item: item});
         return {
           link: item.link ?? "",
           title: item.title,

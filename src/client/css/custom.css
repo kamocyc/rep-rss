@@ -57,7 +57,13 @@
 .comment-row {
   margin-top: 3px;
   margin-bottom: 3px;
-  border: solid 2px #fc9;
+  border: solid 2px rgb(130,220,255);
+}
+
+.comment-row-hatebu {
+  margin-top: 3px;
+  margin-bottom: 3px;
+  border: solid 2px #ddd;
 }
 
 .tweet-display-name > a:link,

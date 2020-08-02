@@ -114,7 +114,7 @@ registerRss(app);
 
 app.post('/api/login_user', authMiddleware, (req, res) => {
   // Without req.session.save, we have to login twice!!!
-  console.log({"req.session": req.session});
+  // console.log({"req.session": req.session});
   
   if(req.session !== undefined) {              
     req.session.save(() => {
@@ -152,7 +152,7 @@ app.post('/api/logout', function (req, res) {
 app.get('*', function (req, res) {
   console.log({send_file: "send file"});
   console.log({isAuthenticated: req.isAuthenticated()});
-  console.log({session: req.session});
+  // console.log({session: req.session});
 
   res.sendFile('./index.html', { root: path.join('./', 'dist', 'client') });
 });

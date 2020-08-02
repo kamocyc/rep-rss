@@ -12,11 +12,11 @@ export function registerRss(app: Express) {
         return;
       }
       
-      console.log(user);
+      // console.log(user);
       
       const rsses = await (user as any).getRsses() as Rss[];
       
-      console.log(rsses);
+      // console.log(rsses);
       
       //console.log(rsses);
       res.json({
@@ -46,10 +46,10 @@ export function registerRss(app: Express) {
         
         const reqRsses = (req.body.rsses as {url: string}[]);
         const dbRsses = (user as any).Rsses as Rss[];
-        console.log({
-          reqRsses: reqRsses,
-          dbRsses: dbRsses
-        });
+        // console.log({
+        //   reqRsses: reqRsses,
+        //   dbRsses: dbRsses
+        // });
         const dbRssUrls = new Set(dbRsses.map(rss => rss.url));
         const reqRssUrls = new Set(reqRsses.map(rss => rss.url));
         
