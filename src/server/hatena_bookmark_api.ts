@@ -33,6 +33,16 @@ export async function getHatenaBookmark(qSet: QuerySetting): Promise<{ status: S
   
   const data = (await res.json()) as BookmarkList;
   
+  if(data === null) {
+    //no bookmarks
+    return  {
+      status: 'ok',
+      tweets: [],
+      data: undefined,
+      count: 0
+    };
+  }
+  
   if(qSet.since !== undefined) {
     data.bookmarks = data.bookmarks.filter(b => new Date(b.timestamp + ":00+09:00") > (qSet.since as Date));
   }
