@@ -1,3 +1,4 @@
+import { tr } from './i18n';
 
 export type CommentType = {
   text: string,
@@ -26,15 +27,15 @@ export type ArticleType = {
 
 export function getReadableInterval(date1: Date, date2: Date): string {
   const suffices = {
-    second: "second",
-    minute: "minute",
-    hour: "hour",
-    day: "day"
+    second: tr("second"),
+    minute: tr("minute"),
+    hour: tr("hour"),
+    day: tr("day")
   };
   
   const toPlural = (num: number, text: string) => {
     if(num >= 2) {
-      return text + "s";
+      return text + tr("plural");
     }
     return text;
   };

@@ -23,6 +23,11 @@ export const tr = (key: string): string => {
     'enter_rss_url': {en: 'Enter RSS URL', ja: 'RSSのURLを入力'},
     'illegal_url': {en: 'Illegal URL!!', ja: '不正なURLです'},
     'duplicated': {en: 'Duplicated!!', ja: '重複しています'},
+    'plural': {en: 's', ja: ''},
+    'second': {en: 'second', ja: '秒'},
+    'minute': {en: 'minute', ja: '分'},
+    'hour': {en: 'hour', ja: '時間'},
+    'day': {en: 'day', ja: '日'},
   };
   
   if(dict[key] === undefined) {
