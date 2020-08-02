@@ -1,4 +1,5 @@
 import { tr } from './i18n';
+import ReactGA from 'react-ga';
 
 export type CommentType = {
   text: string,
@@ -54,4 +55,8 @@ export function getReadableInterval(date1: Date, date2: Date): string {
   }
   
   return Math.round(intervalSec / 60 / 60 / 24) + " " + toPlural(intervalSec, suffices.day);
+}
+
+export const GApageView = (page: string) => {   
+  ReactGA.pageview(page);   
 }

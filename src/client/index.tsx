@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Alert, Button, Col, Container, Row } from 'react-bootstrap';
 import ReactDOM from "react-dom";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
@@ -11,6 +11,10 @@ import './css/custom.css';
 import { GlobalContext, GlobalContextProvider } from './login-context';
 import { RssEditPage } from './RssEdit';
 import { tr } from './i18n';
+import ReactGA from 'react-ga';
+import { GApageView } from './common';
+
+ReactGA.initialize("UA-146348131-3");
 
 // function SearchPage() {
 //   return (
@@ -35,6 +39,7 @@ const ProgressBar = ({ articleUpdateState } : { articleUpdateState: boolean }) =
 
 export const LoginPage = () => {
   const { state } = useContext(GlobalContext);
+  useEffect(() => { GApageView("login"); }, []);
   
   const loginButton = state.userName !== undefined ?
     (<Alert variant="warning">{tr("you_are_already_logged_in")}</Alert>) :
@@ -68,7 +73,7 @@ const TopPage = () => {
   
   const mainContent =
     !loginState.initialized ? message(tr("please_wait")) :
-    loginState.userName === undefined ? (<>{message(tr("please_login"))}{<p className="app-description">{tr('app_description')}</p>}</>) :
+    loginState.userName === undefined ? (<>{message(tr("please_login"))}{<p className="app-description">{tr('app_description')}</p>}{<p className="ga-agreement">{tr('ga_agreement')}</p>}</>) :
     articleData.status === 'not_logged_in' || articleData.status === 'uninitialized' ? message(tr("loading")) : 
     articleData.articles.length === 0 && articleState.isUpdating ? message(tr('updating_rss_feeds')) :
     articleData.status === 'no_rss' ? message(tr('subscribe_rss_feeds')) :
@@ -85,6 +90,8 @@ const TopPage = () => {
 }
 
 const Index = () => {
+  useEffect(() => { GApageView("top"); }, []);
+  
   return (
     <GlobalContextProvider>
     <ArticleUpdateContextProvider>
@@ -92,9 +99,7 @@ const Index = () => {
     <div>
     <Container>
       <Switch>  
-        <Route exact path="/" render={() => (
-          <TopPage />
-        )} />
+        <Route exact path="/" history={history} component={TopPage}/>
         <Route exact path="/login" component={LoginPage} />
         {/* <Route path="/search" component={SearchPage} /> */}
         <Route path="/edit_rss" component={RssEditPage} />

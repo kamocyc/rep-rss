@@ -3,6 +3,7 @@ import { Button, Col, Form, Row } from "react-bootstrap";
 import { AppNavBar } from './AppNavBar';
 import { ArticleUpdateContext } from './article-update-context';
 import { tr } from './i18n';
+import { GApageView } from './common';
 
 type Rss = {
   url: string 
@@ -161,6 +162,7 @@ const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>
 
 export const RssEditPage = () => {
   const {rsses, dispatch} = useRender('/api/rss_get', '/api/rss_update');
+  useEffect(() => { GApageView("rss_edit"); }, []);
   
   return (
     <div className="rss-wrap">

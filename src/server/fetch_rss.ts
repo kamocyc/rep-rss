@@ -270,7 +270,6 @@ async function updateTweets(twClient: Twitter, articles: Article[]): Promise<{
   };
 }
 
-//TODO: tweet検索でのsinceを実装
 export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
   title: string;
   maxPubDate: Date;
@@ -295,10 +294,14 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
       console.log({updateRss: {status}});
       
       if(status !== 'ok') {
+        //情報が取得できなかったら記事はいったん削除する。
+        await Article.destroy({where: { articleId: article.articleId}});
+        
         return {
           tweetCount: 0,
           status,
-          pubDate: article.pubDate
+          pubDate: article.pubDate,
+          articleId: article.articleId,
         };
       }
       
@@ -320,16 +323,18 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
           }
         });
       
-      return { tweetCount, status, pubDate: article.pubDate };
+      return { tweetCount, status, pubDate: article.pubDate, articleId: article.articleId };
     } catch(error) {
       console.error(error);
-      return { tweetCount: -1, status: ('error' as SearchApiStatus), pubDate: article.pubDate };
+      return { tweetCount: -1, status: ('error' as SearchApiStatus), pubDate: article.pubDate, articleId: article.articleId };
     }
   }));
   
   const maxPubDate = results.filter(r => r.status === 'ok').map(r => r.pubDate).reduce((acc, x) => acc < x ? x : acc, new Date('1980-01-01'));
   
-  return { title, maxPubDate,
+  return {
+    title,
+    maxPubDate,
     status: aggreagateStatuses(results.map(r => r.status)),
     count: createdArticles.length
   };

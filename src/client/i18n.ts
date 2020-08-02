@@ -29,6 +29,9 @@ export const tr = (key: string): string => {
     'hour': {en: 'hour', ja: '時間'},
     'day': {en: 'day', ja: '日'},
     'twitter_rate_limit': {en: 'Twitter API rate limit. Please reload page after 15 minutes', ja: 'Twitter APIの制限を超えました。15分以上待ってからページを更新してください。'},
+    'ga_agreement': {
+      en: 'This website uses Google Analytics to analyze visits of users. We assume that you agree to the use of cookies by using this website.',
+      ja: '本サイトではサイトの訪問状況の分析のため、Google Analyticsを利用しておいます。ユーザーは、本サイトを利用することでcookieの使用に許可を与えたものとみなします。'}
   };
   
   if(dict[key] === undefined) {

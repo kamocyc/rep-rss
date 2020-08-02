@@ -5,6 +5,7 @@ import { AppNavBar } from './AppNavBar';
 import { ArticleItem } from './ArticleItem';
 import { ArticleType, CommentType, getReadableInterval } from './common';
 import { tr } from './i18n';
+import { GApageView } from './common';
 
 function getTweetUrl(userScreenName: string, tweetId: string): string {
   return `https://twitter.com/${userScreenName}/status/${tweetId}`;
@@ -75,6 +76,8 @@ export const CommentList = () => {
       setArticle(list.article);
     });
   }, []);
+  
+  useEffect(() => { GApageView("article_comment"); }, []);
   
   return (
     <div>
