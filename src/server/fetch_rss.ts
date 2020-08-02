@@ -379,13 +379,14 @@ export async function getArticles(url: string): Promise<{articles: ArticleType[]
           content = content.substring(0, ARTICLE_BODY_MAX);
         }
         
+        console.log({item: item});
         return {
           link: item.link ?? "",
           title: item.title,
           description: content,
           enclosure: item.enclosure?.url,
           //TODO
-          pubDate: item.pubDate !== undefined ? new Date(item.pubDate) : new Date('1980-01-01')
+          pubDate: item.pubDate !== undefined ? new Date(item.pubDate) : item['dc:date'] !== undefined ? new Date(item['dc:date']) : new Date('1980-01-01')
         };
       }),
       title: feed.title
