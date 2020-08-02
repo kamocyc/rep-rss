@@ -59,6 +59,7 @@ export const useDataApi = < T, S >(initialUrl: string, fetchOptions: RequestInit
         dispatch({ type: 'FETCH_INIT' });
   
         try {
+          console.log({DO_REALOD: true});
           const result = await fetch(url, fetchOptions);
           const data = (await result.json()) as T;
           // const data = { articles: [], status: 'ok' };

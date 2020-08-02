@@ -17,6 +17,7 @@ import User from './models/user';
 import { authMiddleware, registerRememberMe } from './remember_me';
 import { registerRss } from './rss';
 import { LoginUser }from './common';
+import favicon from 'serve-favicon';
 
 (async () => {
   User.belongsToMany(Rss, { through: `${User.tableName}_${Rss.tableName}` });
@@ -37,6 +38,7 @@ registerRememberMe(passport);
 export const app = express();
 
 app.use(helmet());
+app.use(favicon(path.join('./', 'public', 'favicon.ico')))
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
