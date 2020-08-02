@@ -51,9 +51,6 @@ Then run with environment variables.
 CONSUMER_KEY="YOUR_CONSUMER_KEY" CONSUMER_SECRET="YOUR_CONSUMER_SECRET" SITE_URL="http://127.0.0.1:8080/" APP_HASH_KEY="YOUR_CHOSEN_APP_HASH_KEY" APP_ENC_KEY="YOUR_CHOSEN_APP_ENC_KEY" yarn dev
 ```
 
-### Production
-
-
 ## Deploy to Heroku
 
 Prerequisite.
