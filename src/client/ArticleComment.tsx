@@ -39,7 +39,7 @@ const Comment = ({ comment } : { index: number, comment: CommentType }) => {
     </Row>);
     
   return (
-    <Row className={"comment-row" + (isHatebu(comment) ? '-hatebu' : '')}>
+    <Row className={"comment-row-common comment-row" + (isHatebu(comment) ? '-hatebu' : '')}>
       <Container>
         {commentElm}
         <Row>{comment.text}</Row>

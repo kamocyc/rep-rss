@@ -1,5 +1,5 @@
 
-export const tr = (key: string): string => {
+export const tr = (key: string, data?: string): string => {
   const dict: { [key: string]: {en: string, ja: string}} = {
     'please_wait': {en: 'Please wait ...', ja: 'お待ちください ...'},
     'please_login': {en: 'Please login', ja: 'ログインしてください'},
@@ -11,9 +11,6 @@ export const tr = (key: string): string => {
     'subscribe_rss_feeds':
       {en: `Please subscribe RSS feeds with "Edit RSS" link above.`,
        ja: `上の「RSSを編集」リンクからRSSフィードを登録してください。`},
-    'subscribe_rss_feeds_eg':
-      {en: `(e.g. http://rss.cnn.com/rss/edition.rss )`,
-       ja: `(例: https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml )`},
     'no_articles': {en: 'No articles', ja: '記事がありません'},
     'login_with_twitter': {en: 'Login with Twitter', ja: 'Twitterでログイン'},
     'back': {en: 'Back', ja: '戻る'},
@@ -34,17 +31,35 @@ export const tr = (key: string): string => {
     'twitter_rate_limit': {en: 'Twitter API rate limit. Please reload page after 15 minutes', ja: 'Twitter APIの制限を超えました。15分以上待ってからページを更新してください。'},
     'ga_agreement': {
       en: 'This website uses Google Analytics to analyze visits of users. We assume that you agree to the use of cookies by using this website.',
-      ja: '本サイトではサイトの訪問状況の分析のため、Google Analyticsを利用しておいます。ユーザーは、本サイトを利用することでcookieの使用に許可を与えたものとみなします。'}
+      ja: '本サイトではサイトの訪問状況の分析のため、Google Analyticsを利用しておいます。ユーザーは、本サイトを利用することでcookieの使用に許可を与えたものとみなします。'},
+    'register_with': {en: 'Try subscribing to {{}}', ja: '{{}} を登録してみる。'},
+    'points': {en: 'points', ja: 'ポイント'},
+    'comments': {en: 'comments', ja: 'コメント'},
   };
   
   if(dict[key] === undefined) {
-    throw new Error('Illegal text key');
+    throw new Error('Illegal text key: ' + key);
   }
   
   if(navigator.language !== 'ja' && navigator.language !== 'en') {
     return dict[key].en;
   }
   
-  return dict[key][navigator.language];
+  const text = dict[key][navigator.language];
+  return data !== undefined ? text.replace("{{}}", data) : text;
 };
 
+export const getExampleRss = (): string[] => {
+  const lang = navigator.language !== 'ja' && navigator.language !== 'en' ? 'en' : navigator.language;
+  
+  return {
+    en: [
+      'http://rss.cnn.com/rss/edition.rss',
+      // 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+    ],
+    ja: [
+      'https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml',
+      // 'https://b.hatena.ne.jp/entrylist/all.rss'
+    ]
+  }[lang];
+}

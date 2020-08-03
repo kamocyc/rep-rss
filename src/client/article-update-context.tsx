@@ -19,7 +19,7 @@ interface ArticleUpdateAction {
 
 const initState: ArticleUpdateContextType = {
   isUpdating: false,
-  isReloading: false,
+  isReloading: true,
   articleData: { articles: [] as ArticleType[], status: 'uninitialized' },
   updateCount: 0,
   reloadCount: 0
@@ -37,6 +37,11 @@ const reducer = (state: ArticleUpdateContextType, action: ArticleUpdateAction): 
   console.log({"action.type": action.type, state, action});
   
   switch (action.type) {
+    case 'INIT_UPDATING':
+      return {
+        ...state,
+        isUpdating: true
+      };
     case 'UPDATE':
       return {
         ...state,
@@ -87,6 +92,10 @@ export const ArticleUpdateContextProvider = (props: any) => {
   
   useEffect(() => {
     console.log({"loginState.userName": loginState.userName});
+    if(loginState.userName !== undefined && state.reloadCount == 0) {
+      dispatch({type: 'INIT_UPDATING'});
+    }
+    
     if(articleDataState.isLoading !== true) {
       if(loginState.userName !== undefined) {
         if(currentUrl === '') {

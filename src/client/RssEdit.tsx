@@ -2,12 +2,18 @@ import React, { useEffect, useReducer, useRef, useState, useContext } from "reac
 import { Button, Col, Form, Row } from "react-bootstrap";
 import { AppNavBar } from './AppNavBar';
 import { ArticleUpdateContext } from './article-update-context';
-import { tr } from './i18n';
+import { tr, getExampleRss } from './i18n';
 import { GApageView } from './common';
+
+type RssState = {
+  initialized: boolean,
+  rsses: Rss[]
+};
 
 type Rss = {
   url: string 
 };
+
 type RssActionType = {
   type: string,
   rsses?: Rss[],
@@ -20,34 +26,44 @@ const initRss = (rsses: Rss[]) => { return {type: 'INIT_RSS', rsses: rsses}; };
 const addRss = (url: string) => { return {type: 'ADD_RSS', url: url }};
 const removeRss = (index: number) => { return {type: 'REMOVE_RSS', index: index }};
 
-type RssResucerType = (rsses: Rss[], action: RssActionType) => Rss[];
+type RssResucerType = (rssState: RssState, action: RssActionType) => RssState;
 
-const rssReducer: RssResucerType = (rsses, action) => {
+const rssReducer: RssResucerType = (rssState, action): RssState => {
+  console.log({rssState: rssState, action: action})
   switch (action.type) {
     case 'INIT_RSS':
-      return action.rsses as Rss[];
+      return {
+        initialized: true,
+        rsses: action.rsses as Rss[]
+      };
     case 'ADD_RSS':
-      return ([...rsses, {
-        url: action.url as string,
-      }] as Rss[]);
+      return {
+        rsses: ([...rssState.rsses, {
+          url: action.url as string,
+        }] as Rss[]),
+        initialized: true,
+      };
     case 'REMOVE_RSS':
       {
         const newRsses = [];
-        for(let i=0; i<rsses.length; i++) {
+        for(let i=0; i<rssState.rsses.length; i++) {
           if(action.index !== i) {
-            newRsses.push(rsses[i]);
+            newRsses.push(rssState.rsses[i]);
           }
         }
-        return newRsses;
+        return {
+          rsses: newRsses,
+          initialized: true
+        };
       }
     default:
       throw Error("illegal action type: " + action.type);
-      return [...rsses];
+      return rssState;
   }
 };
 
 const useRender = (getEndpoint: string, updateEndpoint: string) => {
-  const [rsses, dispatch] = useReducer(rssReducer, []);
+  const [rssState, dispatch] = useReducer(rssReducer, {initialized: false, rsses: []});
   const { dispatch: articleUpdateDispatch } = useContext(ArticleUpdateContext);
   const isFirstRender = useRef(true);
   const isServerChange = useRef(false);
@@ -71,7 +87,7 @@ const useRender = (getEndpoint: string, updateEndpoint: string) => {
       fetch(updateEndpoint, {
         method: 'POST',
         body: JSON.stringify({
-          rsses: [...rsses]
+          rsses: [...rssState.rsses]
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -84,9 +100,9 @@ const useRender = (getEndpoint: string, updateEndpoint: string) => {
         articleUpdateDispatch({type: 'UPDATE'});
       });
     }
-  }, [getEndpoint, updateEndpoint, rsses]);
+  }, [getEndpoint, updateEndpoint, rssState.rsses]);
   
-  return {rsses, dispatch};
+  return {rssState, dispatch};
 }
 
 const Rss = ({ rss, index, dispatch }: { rss: Rss, index: number, dispatch: React.Dispatch<RssActionType> }) => {
@@ -120,7 +136,7 @@ function isUrlLike(text: string) {
   return text.match(replacePattern1) !== null;
 }
 
-const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>, rsses: Rss[] }) => {
+const RssForm = ({ dispatch ,rssState } : { dispatch: React.Dispatch<RssActionType>, rssState: RssState }) => {
   const [rssUrl, setRssUrl] = useState('');
   
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
@@ -132,7 +148,7 @@ const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>
     }
     
     //重複の簡易検査
-    if(rsses.find(rss => rss.url.toLowerCase() === rssUrl.toLowerCase()) !== undefined) {
+    if(rssState.rsses.find(rss => rss.url.toLowerCase() === rssUrl.toLowerCase()) !== undefined) {
       alert(tr("duplicated"));
       return;
     }
@@ -141,34 +157,50 @@ const RssForm = ({ dispatch ,rsses } : { dispatch: React.Dispatch<RssActionType>
     setRssUrl('');
   };
   
+  const handleSampleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    console.log((e.target as HTMLButtonElement).getAttribute('data-key'));
+    dispatch(addRss(getExampleRss()[parseInt((e.target as HTMLButtonElement).getAttribute('data-key') as string)]));
+  };
+  
+  const hintButton = rssState.rsses.length === 0 && rssState.initialized === true ?
+    (<>
+      {getExampleRss().map((url, i) => (<Button variant="info" key={i} data-key={i} onClick={handleSampleClick}>{tr('register_with', url)}</Button>))}
+    </>) :
+    (<></>);
+    
   return (
-    <Form onSubmit={submitHandler}>
-      <Form.Row className="align-items-center">
-        <Col sm={10}>
-          <Form.Control 
-            type="text"
-            placeholder={tr('enter_rss_url')}
-            value={rssUrl}
-            onChange={e => setRssUrl(e.target.value)}
-          />
-        </Col>
-        <Col sm={2}>
-          <Button type="submit">{tr("add_rss")}</Button>
-        </Col>
-      </Form.Row>
-    </Form>
+    <>
+      <Form onSubmit={submitHandler}>
+        <Form.Row className="align-items-center">
+          <Col sm={10}>
+            <Form.Control 
+              type="text"
+              placeholder={tr('enter_rss_url')}
+              value={rssUrl}
+              onChange={e => setRssUrl(e.target.value)}
+            />
+          </Col>
+          <Col sm={2}>
+            <Button type="submit">{tr("add_rss")}</Button>
+          </Col>
+        </Form.Row>
+      </Form>
+      {hintButton}
+    </>
   );
 };
 
 export const RssEditPage = () => {
-  const {rsses, dispatch} = useRender('/api/rss_get', '/api/rss_update');
+  const {rssState, dispatch} = useRender('/api/rss_get', '/api/rss_update');
   useEffect(() => { GApageView("rss_edit"); }, []);
+  
+  console.log({rssState: rssState});
   
   return (
     <div className="rss-wrap">
       <AppNavBar />
-      <RssList rsses={rsses} dispatch={dispatch} />
-      <RssForm dispatch={dispatch} rsses={rsses} />
+      <RssList rsses={rssState.rsses} dispatch={dispatch} />
+      <RssForm dispatch={dispatch} rssState={rssState} />
     </div>
   );
 };

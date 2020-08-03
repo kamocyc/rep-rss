@@ -26,16 +26,6 @@ ReactGA.initialize("UA-146348131-3");
 //   );
 // }
 
-const ProgressBar = ({ articleUpdateState } : { articleUpdateState: boolean }) => {
-  switch (articleUpdateState) {
-    // case 'wait_update_article':
-    // case 'wait_update_tweet':
-    case true:
-      return (<div className="progress-bar">{tr('updating_rss_feeds')}</div>);
-    default:
-      return (<div className="progress-bar done-progress-bar">&nbsp;</div>);
-  }
-}
 
 export const LoginPage = () => {
   const { state } = useContext(GlobalContext);
@@ -61,7 +51,6 @@ export const LoginPage = () => {
 };
 
 const TopPage = () => {
-  
   const { state: articleState } = useContext(ArticleUpdateContext);
   const { state: loginState } = useContext(GlobalContext);
   
@@ -84,7 +73,6 @@ const TopPage = () => {
     articleData.status === 'no_rss' ? (
       <>
         {message(tr('subscribe_rss_feeds'))}
-        <p className="rss-example">{tr("subscribe_rss_feeds_eg")}</p>
       </> ) :
     articleData.articles.length === 0 ? message(tr('no_articles')) :
     (<ArticleList articles={articleData.articles} />);
@@ -92,7 +80,6 @@ const TopPage = () => {
   return (
     <div>
       <AppNavBar />
-      <ProgressBar articleUpdateState={articleState.isUpdating} />
       {mainContent}
     </div>
   );

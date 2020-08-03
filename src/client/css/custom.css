@@ -32,13 +32,13 @@
 }
 
 .article-point {
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 2px;
+  font-size: 100%;
 }
 
 .article-comment-count {
-  margin-bottom: 4px;
+  font-size: 100%;
+  color: #444;
+  text-decoration: underline;
 }
 
 .rss-row {
@@ -98,10 +98,6 @@
   background-color: #fff;
 }
 
-/* .app-description {
-  
-} */
-
 .ga-agreement {
   font-size: 80%;
 }
@@ -113,4 +109,28 @@
 .rss-example {
   font-size: 90%;
   text-align: center;
+}
+
+.article-rank {
+  font-size: 120%;
+  color: #333;
+  text-align: center;
+}
+
+.right-margin {
+  margin-right: 20px; 
+}
+
+/* .second-article-row {
+  padding-bottom: 15px;
+} */
+
+.comment-row-common {
+  margin: 2px -7px;
+}
+
+.article-item {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }

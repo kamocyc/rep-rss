@@ -61,7 +61,9 @@ export function registerArticle(app: Express) {
                     include: [
                       [
                         //日次の引き算はinterval型、それを整数に変換するにはextractを使う。
-                        Sequelize.literal(`(${rssArticles}."point" - extract(epoch from NOW() - ${rssArticles}."pubDate") / 60 / 2.5)`),
+                        //24時間で2000減少する数値
+                        //1.00529236 = POW(2000,1/(24*60))
+                        Sequelize.literal(`(${rssArticles}."point" - (CASE WHEN extract(epoch from NOW() - ${rssArticles}."pubDate") <= 24 * 60 * 2 * 60 THEN pow(1.00529236, extract(epoch from NOW() - ${rssArticles}."pubDate") / 60) ELSE 2100000000 END))`),
                         'calculatedPoint'
                       ],
                       [
@@ -78,7 +80,6 @@ export function registerArticle(app: Express) {
               ]
             }
           ],
-          order: [[Sequelize.literal(`(${rssArticles}."point" - extract(epoch from NOW() - ${rssArticles}."pubDate") / 60 / 2.5)`), 'DESC']],
         });
         
         if(user === null) {
