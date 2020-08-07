@@ -1,7 +1,8 @@
 {
-  "name": "Rep RSS",
-  "description": "Rep rss.",
+  "name": "rep-rss",
+  "description": "RSS with reputation",
   "logo": "",
-  "keywords": ["node"],
+  "keywords": ["node", "RSS", "twitter"],
+  "repository": "https://github.com/kamocyc/rep-rss",
   "image": "heroku/nodejs"
 }

@@ -157,8 +157,16 @@ app.post('/api/logout', csrfProtection, function (req, res) {
   }
 });
 
+app.get('/main.js', csrfProtection, function (req, res) {
+  console.log({send_file: "send file main.js"});
+  console.log({isAuthenticated: req.isAuthenticated()});
+  // console.log({session: req.session});
+
+  res.sendFile('./main.js', { root: path.join('./', 'dist', 'client') });
+});
+
 app.get('*', csrfProtection, function (req, res) {
-  console.log({send_file: "send file"});
+  console.log({send_file: "send file root"});
   console.log({isAuthenticated: req.isAuthenticated()});
   // console.log({session: req.session});
 
