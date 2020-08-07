@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Nav, Navbar } from 'react-bootstrap';
 import { Link, useLocation } from "react-router-dom";
-import { GlobalContext } from './login-context';
+import { GlobalContext } from './global-context';
 import { tr } from './i18n';
 import { ArticleUpdateContext } from './article-update-context';
 
@@ -27,6 +27,7 @@ export const AppNavBar = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "CSRF-Token": state.csrfToken
       },
       credentials: 'include',
     })
@@ -59,6 +60,7 @@ export const AppNavBar = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "CSRF-Token": state.csrfToken
       },
       credentials: 'include',
     })

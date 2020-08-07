@@ -4,6 +4,7 @@ import { AppNavBar } from './AppNavBar';
 import { ArticleUpdateContext } from './article-update-context';
 import { tr, getExampleRss } from './i18n';
 import { GApageView } from './common';
+import { GlobalContext } from './global-context';
 
 type RssState = {
   initialized: boolean,
@@ -64,6 +65,7 @@ const rssReducer: RssResucerType = (rssState, action): RssState => {
 
 const useRender = (getEndpoint: string, updateEndpoint: string) => {
   const [rssState, dispatch] = useReducer(rssReducer, {initialized: false, rsses: []});
+  const { state: globalState } = useContext(GlobalContext);
   const { dispatch: articleUpdateDispatch } = useContext(ArticleUpdateContext);
   const isFirstRender = useRef(true);
   const isServerChange = useRef(false);
@@ -90,7 +92,8 @@ const useRender = (getEndpoint: string, updateEndpoint: string) => {
           rsses: [...rssState.rsses]
         }),
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          "CSRF-Token": globalState.csrfToken
         }
       })
       .then(res => res.json())

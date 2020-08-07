@@ -18,6 +18,8 @@ import { authMiddleware, registerRememberMe } from './remember_me';
 import { registerRss } from './rss';
 import { LoginUser }from './common';
 import favicon from 'serve-favicon';
+import { SESSION_SECRET } from './secure_token';
+import csrf from 'csurf';
 
 (async () => {
   User.belongsToMany(Rss, { through: `${User.tableName}_${Rss.tableName}` });
@@ -33,6 +35,8 @@ import favicon from 'serve-favicon';
   await sequelize.sync();
 })();
 
+const csrfProtection = csrf({ cookie: true });
+
 registerRememberMe(passport);
 
 export const app = express();
@@ -44,16 +48,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use(express.static(path.join('./', 'dist', 'client')));
+// app.use(express.static(path.join('./', 'dist', 'client')));
 
-app.use(session({ secret: '417cce55dcfcfaeb', resave: true, saveUninitialized: true }));
+app.use(session({ secret: SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/auth/twitter/callback',
+  csrfProtection,
   passport.authenticate('twitter', { failureRedirect: '/login' }),
   function (req, res) {
-    console.log("this is /auth/twitter/callbac");
+    // console.log("this is /auth/twitter/callback");
     
     //save remember me
     if(req.session !== undefined && req.session.remember_me) {
@@ -72,9 +77,11 @@ app.get('/auth/twitter/callback',
 
 app.get('/auth/twitter',
   passport.authenticate('twitter', { scope: ['user:email'] }),
+  csrfProtection,
   function (/*_req, _res*/) {});
 
-app.post('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
+app.post('/api/update',
+  csrfProtection,
   async (req, res) => {
     //DB内の任意のユーザのデータを用いる必要がある？
     //まずは、ログイン後に手動で更新で、
@@ -88,7 +95,8 @@ app.post('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6',
   }
 );
 
-app.post('/api/update_tweet/',
+app.post('/api/update_tweet',
+  csrfProtection,
   async (req, res) => {
     if(req.user !== undefined) {
       const pointLowerBound = req.query.point_lower_bound ? parseInt(req.query.point_lower_bound as string) : 3;
@@ -104,15 +112,15 @@ app.post('/api/update_tweet/',
   }
 );
 
-deleteUnusedArticle(app);
+deleteUnusedArticle(app, csrfProtection);
 
-registerArticle(app);
+registerArticle(app, csrfProtection);
 
-registerComment(app);
+registerComment(app, csrfProtection);
 
-registerRss(app);
+registerRss(app, csrfProtection);
 
-app.post('/api/login_user', authMiddleware, (req, res) => {
+app.post('/api/login_user', authMiddleware, csrfProtection, (req, res) => {
   // Without req.session.save, we have to login twice!!!
   // console.log({"req.session": req.session});
   
@@ -127,7 +135,7 @@ app.post('/api/login_user', authMiddleware, (req, res) => {
   }
 });
 
-app.post('/api/logout', function (req, res) {
+app.post('/api/logout', csrfProtection, function (req, res) {
   console.log("LOGOUT!");
   
   res.clearCookie('remember_me');
@@ -149,10 +157,11 @@ app.post('/api/logout', function (req, res) {
   }
 });
 
-app.get('*', function (req, res) {
+app.get('*', csrfProtection, function (req, res) {
   console.log({send_file: "send file"});
   console.log({isAuthenticated: req.isAuthenticated()});
   // console.log({session: req.session});
 
+  res.cookie('CSRF-TOKEN', req.csrfToken());
   res.sendFile('./index.html', { root: path.join('./', 'dist', 'client') });
 });

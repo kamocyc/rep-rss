@@ -8,3 +8,5 @@ export const siteUrl = process.env.SITE_URL as string;
 
 export const APP_HASH_KEY = process.env.APP_HASH_KEY as string;
 export const APP_ENC_KEY = process.env.APP_ENC_KEY as string;
+
+export const SESSION_SECRET = process.env.SESSION_SECRET as string;

@@ -1,7 +1,7 @@
 import React, { createContext, Dispatch, useContext, useEffect, useReducer } from "react";
 import { ArticleType } from './common';
 import './css/custom.css';
-import { GlobalContext } from './login-context';
+import { GlobalContext } from './global-context';
 import { useDataApi } from './useDataApi';
 import { tr } from './i18n';
 
@@ -76,7 +76,7 @@ const reducer = (state: ArticleUpdateContextType, action: ArticleUpdateAction): 
 export const ArticleUpdateContextProvider = (props: any) => {
   const listApiEndpoint = '/api/article_get';
   const [state, dispatch] = useReducer(reducer, initState);
-  const { state: loginState } = useContext(GlobalContext);
+  const { state: globalState } = useContext(GlobalContext);
   const { state: articleDataState, url: currentUrl, checkData, setCheckData, setUrl } =
     useDataApi<{ articles: ArticleType[], status: string }, {count: number}>(
       '',
@@ -91,13 +91,13 @@ export const ArticleUpdateContextProvider = (props: any) => {
   }, [articleDataState]);
   
   useEffect(() => {
-    console.log({"loginState.userName": loginState.userName});
-    if(loginState.userName !== undefined && state.reloadCount == 0) {
+    console.log({"globalState.userName": globalState.userName});
+    if(globalState.userName !== undefined && state.reloadCount == 0) {
       dispatch({type: 'INIT_UPDATING'});
     }
     
     if(articleDataState.isLoading !== true) {
-      if(loginState.userName !== undefined) {
+      if(globalState.userName !== undefined) {
         if(currentUrl === '') {
           setUrl(listApiEndpoint); 
         } else {
@@ -108,17 +108,18 @@ export const ArticleUpdateContextProvider = (props: any) => {
     } else {
       console.log({reloadcount: state.reloadCount, loading: articleDataState.isLoading});
     }
-  }, [loginState.userName, state.reloadCount]);
+  }, [globalState.userName, state.reloadCount]);
   
   useEffect(() => {
-    if(loginState.userName !== undefined) {
+    if(globalState.userName !== undefined) {
       (async () => {
         // setArticleUpdateState({status: 'wait_update_article'});
         
-        const res1 = await fetch('/api/update/e85aa25b799538a7a07c0475e3f6f6fa5898cdf6', {
+        const res1 = await fetch('/api/update', {
             method: 'POST',
             headers: {
               "Content-Type": "application/json",
+              "CSRF-Token": globalState.csrfToken
             },
             credentials: 'include',
           }
@@ -138,10 +139,11 @@ export const ArticleUpdateContextProvider = (props: any) => {
         
         // setArticleUpdateState({status: 'wait_update_tweet'});
         
-        const res2 = await fetch('/api/update_tweet/', {
+        const res2 = await fetch('/api/update_tweet', {
             method: 'POST',
             headers: {
               "Content-Type": "application/json",
+              "CSRF-Token": globalState.csrfToken
             },
             credentials: 'include',
           }
@@ -170,6 +172,7 @@ export const ArticleUpdateContextProvider = (props: any) => {
             method: 'POST',
             headers: {
               "Content-Type": "application/json",
+              "CSRF-Token": globalState.csrfToken
             },
             credentials: 'include',
         })
@@ -184,7 +187,7 @@ export const ArticleUpdateContextProvider = (props: any) => {
         return;
       })();
     }
-  }, [loginState.userName, state.updateCount]);
+  }, [globalState.userName, state.updateCount]);
   
   return <ArticleUpdateContext.Provider value={{state, dispatch}}>{props.children}</ArticleUpdateContext.Provider>;
 }

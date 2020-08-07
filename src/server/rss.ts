@@ -3,8 +3,8 @@ import { LoginUser } from './common';
 import Rss from './models/rss';
 import User from './models/user';
 
-export function registerRss(app: Express) {
-  app.get('/api/rss_get', async function (req, res) {
+export function registerRss(app: Express, csrfProtection: any) {
+  app.get('/api/rss_get', csrfProtection, async function (req, res) {
     if(req.isAuthenticated()) {
       const user = await User.findByPk((req.user as LoginUser).id);
       if(user === null) {

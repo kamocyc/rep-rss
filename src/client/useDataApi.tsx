@@ -1,4 +1,5 @@
-import { useEffect, useState, useReducer } from "react";
+import { useEffect, useState, useReducer, useContext } from "react";
+import { GlobalContext } from './global-context';
 
 export interface DataFetchReducerState<T> {
   isLoading: boolean | undefined;
@@ -43,13 +44,12 @@ const dataFetchReducer = < T extends {} >(state: DataFetchReducerState<T>, actio
 export const useDataApi = < T, S >(initialUrl: string, fetchOptions: RequestInit, initCheckData: S, initialData: T) => {
   const [url, setUrl] = useState(initialUrl);
   const [checkData, setCheckData] = useState(initCheckData);
- 
-  //@ts-ignore
-  const [state, dispatch] = useReducer(dataFetchReducer, {
+  const { state: globalState } = useContext(GlobalContext);
+  const [state, dispatch] = useReducer<(prevState: DataFetchReducerState<T>, action: DataFetchReducerAction<T>) => DataFetchReducerState<T>>(dataFetchReducer, {
     isLoading: undefined,
     isError: false,
     data: initialData,
-  }) as [DataFetchReducerState<T>, React.Dispatch<DataFetchReducerAction<{}>>];
+  });
  
   useEffect(() => {
     let didCancel = false;
@@ -60,7 +60,7 @@ export const useDataApi = < T, S >(initialUrl: string, fetchOptions: RequestInit
   
         try {
           console.log({DO_REALOD: true});
-          const result = await fetch(url, fetchOptions);
+          const result = await fetch(url, { ...fetchOptions, "CSRF-Token": globalState.csrfToken} as any);
           const data = (await result.json()) as T;
           // const data = { articles: [], status: 'ok' };
           console.log({reloaded_data: data});

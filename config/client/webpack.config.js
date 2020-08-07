@@ -5,7 +5,7 @@ const { merge } = require('webpack-merge');
 
 const htmlWebpackPlugin = new HtmlWebPackPlugin({
   template: "./src/client/index.html",
-  filename: "./index.html"
+  filename: "./index.html",
 });
 
 module.exports = merge({
@@ -15,6 +15,8 @@ module.exports = merge({
     filename: '[name].js',
     publicPath: '/'
   },
+  target: 'web',
+  devtool: 'source-map',
   module: {
     rules: [
       {

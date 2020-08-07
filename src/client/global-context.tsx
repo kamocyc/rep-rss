@@ -1,7 +1,8 @@
 import React, { createContext, Dispatch, useReducer } from "react";
 
 interface GlobalContextType {
-  initialized: boolean;
+  csrfToken: string;
+  wasLoginInitialized: boolean;
   userName: string | undefined;
 }
 interface LoginAction {
@@ -9,8 +10,15 @@ interface LoginAction {
   payload?: string | undefined;
 }
 
+function getCSRFToken(): string {
+  const res = document.cookie.split('; ').find(r => r.startsWith('CSRF-TOKEN'))?.split('=')[1];
+  console.log(document.cookie);
+  return res === undefined ? "" : res;
+}
+
 const initState: GlobalContextType = {
-  initialized: false,
+  csrfToken: getCSRFToken(),
+  wasLoginInitialized: false,
   userName: undefined,
 };
 
@@ -27,13 +35,13 @@ const reducer = (state: GlobalContextType, action: LoginAction): GlobalContextTy
     case "SET_LOGIN":
       return {
         ...state,
-        initialized: true,
+        wasLoginInitialized: true,
         userName: action.payload
       };  
     case "SET_LOGOUT":
       return {
         ...state,
-        initialized: true,
+        wasLoginInitialized: true,
         userName: undefined
       };
     default:

@@ -8,24 +8,13 @@ import { ArticleUpdateContext, ArticleUpdateContextProvider } from './article-up
 import { CommentList } from './ArticleComment';
 import { ArticleList } from './ArticleList';
 import './css/custom.css';
-import { GlobalContext, GlobalContextProvider } from './login-context';
+import { GlobalContext, GlobalContextProvider } from './global-context';
 import { RssEditPage } from './RssEdit';
 import { tr } from './i18n';
 import ReactGA from 'react-ga';
 import { GApageView } from './common';
 
 ReactGA.initialize("UA-146348131-3");
-
-// function SearchPage() {
-//   return (
-//     <div>
-//       <AppNavBar />
-//       <SearchArticle />
-//       <ArticleList />
-//     </div>
-//   );
-// }
-
 
 export const LoginPage = () => {
   const { state } = useContext(GlobalContext);
@@ -61,7 +50,7 @@ const TopPage = () => {
   };
   
   const mainContent =
-    !loginState.initialized ? message(tr("please_wait")) :
+    !loginState.wasLoginInitialized ? message(tr("please_wait")) :
     loginState.userName === undefined ? (
       <>
         {<p className="app-description">{tr('app_description')}</p>}

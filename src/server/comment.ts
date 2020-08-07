@@ -2,8 +2,9 @@ import { Express } from 'express';
 import Article from './models/article';
 import Tweet from './models/tweet';
 
-export function registerComment(app: Express) {
+export function registerComment(app: Express, csrfProtection: any) {
   app.get('/api/comment_get',
+    csrfProtection,
     async (req, res) => {
       try {
         const article = await Article.findByPk(req.query.articleId as string, { include: Tweet });
