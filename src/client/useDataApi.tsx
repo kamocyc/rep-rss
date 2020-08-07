@@ -6,8 +6,11 @@ export interface DataFetchReducerState<T> {
   isError: boolean;
   data: T,
 }
+
+type DataFetchReducerActionType = 'FETCH_INIT' | 'FETCH_SUCCESS' | 'FETCH_FAILURE';
+
 interface DataFetchReducerAction<T> {
-  type: 'FETCH_INIT' | 'FETCH_SUCCESS' | 'FETCH_FAILURE';
+  type: DataFetchReducerActionType;
   payload?: T
 }
 

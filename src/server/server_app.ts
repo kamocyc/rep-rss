@@ -14,7 +14,7 @@ import Rss from './models/rss';
 import { sequelize } from './models/sequelize-loader';
 import Tweet from './models/tweet';
 import User from './models/user';
-import { authMiddleware, registerRememberMe } from './remember_me';
+import { authMiddleware, registerAuthentication } from './authentication';
 import { registerRss } from './rss';
 import { LoginUser }from './common';
 import favicon from 'serve-favicon';
@@ -37,7 +37,7 @@ import csrf from 'csurf';
 
 const csrfProtection = csrf({ cookie: true });
 
-registerRememberMe(passport);
+registerAuthentication(passport);
 
 export const app = express();
 
@@ -121,9 +121,7 @@ registerComment(app, csrfProtection);
 registerRss(app, csrfProtection);
 
 app.post('/api/login_user', authMiddleware, csrfProtection, (req, res) => {
-  // Without req.session.save, we have to login twice!!!
-  // console.log({"req.session": req.session});
-  
+
   if(req.session !== undefined) {              
     req.session.save(() => {
       res.header('Access-Control-Allow-Credentials','true');

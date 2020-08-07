@@ -5,10 +5,15 @@ import { GlobalContext } from './global-context';
 import { useDataApi } from './useDataApi';
 import { tr } from './i18n';
 
+interface ArticleDataType {
+  articles: ArticleType[];
+  status: string;
+}
+
 interface ArticleUpdateContextType {
   isUpdating: boolean;
   isReloading: boolean;
-  articleData: { articles: ArticleType[]; status: string };
+  articleData: ArticleDataType;
   updateCount: number;
   reloadCount: number;
 }
@@ -62,7 +67,7 @@ const reducer = (state: ArticleUpdateContextType, action: ArticleUpdateAction): 
           articleData: action.articleData
         };
       }
-      throw new Error('Illegal ation type + articleData');
+      throw new Error('(__SET_ARTICLES) articleData should not be undefined');
     case '__FINISH_UPDATING':
       return {
         ...state,
@@ -78,18 +83,20 @@ export const ArticleUpdateContextProvider = (props: any) => {
   const [state, dispatch] = useReducer(reducer, initState);
   const { state: globalState } = useContext(GlobalContext);
   const { state: articleDataState, url: currentUrl, checkData, setCheckData, setUrl } =
-    useDataApi<{ articles: ArticleType[], status: string }, {count: number}>(
+    useDataApi<ArticleDataType, {count: number}>(
       '',
       { method: 'GET' },
       { count: 0 },
       { articles: [], status: "uninitialized" });
   
+  //取得したarticleをソート
   useEffect(() => {
     console.log({articleDataState: articleDataState})
     articleDataState.data.articles.sort((a, b) => b.calculatedPoint - a.calculatedPoint);
     dispatch({type: '__SET_ARTICLES', articleData: articleDataState.data});
   }, [articleDataState]);
   
+  //articleをreload
   useEffect(() => {
     console.log({"globalState.userName": globalState.userName});
     if(globalState.userName !== undefined && state.reloadCount == 0) {
@@ -110,11 +117,10 @@ export const ArticleUpdateContextProvider = (props: any) => {
     }
   }, [globalState.userName, state.reloadCount]);
   
+  //articleのupdate
   useEffect(() => {
     if(globalState.userName !== undefined) {
-      (async () => {
-        // setArticleUpdateState({status: 'wait_update_article'});
-        
+      (async () => {        
         const res1 = await fetch('/api/update', {
             method: 'POST',
             headers: {
@@ -136,8 +142,6 @@ export const ArticleUpdateContextProvider = (props: any) => {
             return;
           }
         }
-        
-        // setArticleUpdateState({status: 'wait_update_tweet'});
         
         const res2 = await fetch('/api/update_tweet', {
             method: 'POST',
@@ -162,11 +166,8 @@ export const ArticleUpdateContextProvider = (props: any) => {
           }
         }
         
-        // setArticleUpdateState({status: 'wait_article_clean'});
-        // if(count1 + count2 > 0) {
         //reloadする
         dispatch({type: 'RELOAD'});
-        // }
         
         const res3 = await fetch('/api/article_clean/', {
             method: 'POST',
@@ -179,8 +180,6 @@ export const ArticleUpdateContextProvider = (props: any) => {
         
         const { /*count: count3, */ status: status3 } = await res3.json();
         if(status3 !== 'ok') { console.warn('update 3 error: ' + status3); }
-        
-        // // setArticleUpdateState({status: 'done'});
         
         dispatch({type: '__FINISH_UPDATING'});
         

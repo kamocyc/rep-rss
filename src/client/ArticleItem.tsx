@@ -4,21 +4,12 @@ import { Link } from "react-router-dom";
 import { ArticleType, getReadableInterval } from './common';
 import { tr } from './i18n';
 
-function processArticleLink(link: string): string {
+function formatArticleLink(link: string): string {
   return link.replace(/(^(https?:\/\/)?([^/]+)\/.*)$/, "$3");
 }
 
 export const ArticleItem = ({ index, article, isList } : { index: number, article: ArticleType, isList: boolean }) => {
-  // const articleTitle = isList ? (
-  //   <p className="article-title">
-  //     <Link to={`/comment/${article.articleId}`}>{article.title}</Link>
-  //   </p>
-  // ) : (
-  //   <p className="article-title-for-sub">
-  //     <a href={article.link}>{article.title}</a>
-  //   </p>
-  // );
-  
+
   return (
     <Row>
       <Container className="article-item">
@@ -28,7 +19,7 @@ export const ArticleItem = ({ index, article, isList } : { index: number, articl
           </Col>
           <Col xs={11}>
             <span className="article-title"><a href={article.link} rel="noopener noreferrer" target="_blank">{article.title}</a></span>
-            <span className="link-in-list"><a href={article.link} rel="noopener noreferrer" target="_blank"> &nbsp;({processArticleLink(article.link)})</a></span>
+            <span className="link-in-list"><a href={article.link} rel="noopener noreferrer" target="_blank"> &nbsp;({formatArticleLink(article.link)})</a></span>
           </Col>
         </Row>
         <Row className="second-article-row">

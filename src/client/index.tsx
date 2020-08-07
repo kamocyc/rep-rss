@@ -2,17 +2,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useContext, useEffect } from "react";
 import { Alert, Button, Col, Container, Row } from 'react-bootstrap';
 import ReactDOM from "react-dom";
+import ReactGA from 'react-ga';
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import { AppNavBar } from './AppNavBar';
 import { ArticleUpdateContext, ArticleUpdateContextProvider } from './article-update-context';
 import { CommentList } from './ArticleComment';
 import { ArticleList } from './ArticleList';
+import { GApageView } from './common';
 import './css/custom.css';
 import { GlobalContext, GlobalContextProvider } from './global-context';
-import { RssEditPage } from './RssEdit';
 import { tr } from './i18n';
-import ReactGA from 'react-ga';
-import { GApageView } from './common';
+import { RssEditPage } from './RssEdit';
 
 ReactGA.initialize("UA-146348131-3");
 
@@ -26,7 +26,7 @@ export const LoginPage = () => {
     
   return (
     <div>
-      <Row className="blank-row"> </Row>
+      <Row className="blank-row"></Row>
       <Row>
         <Col sm={2}> </Col>
         <Col sm={8}>{loginButton}</Col>
@@ -86,7 +86,6 @@ const Index = () => {
       <Switch>  
         <Route exact path="/" history={history} component={TopPage}/>
         <Route exact path="/login" component={LoginPage} />
-        {/* <Route path="/search" component={SearchPage} /> */}
         <Route path="/edit_rss" component={RssEditPage} />
         <Route path="/comment/:articleId" component={CommentList} />
       </Switch>

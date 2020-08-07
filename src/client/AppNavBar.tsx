@@ -7,8 +7,6 @@ import { ArticleUpdateContext } from './article-update-context';
 
 const ProgressBar = ({ articleUpdateState } : { articleUpdateState: boolean }) => {
   switch (articleUpdateState) {
-    // case 'wait_update_article':
-    // case 'wait_update_tweet':
     case true:
       return (<div className="progress-bar">{tr('updating_rss_feeds')}</div>);
     default:
@@ -80,9 +78,8 @@ export const AppNavBar = () => {
   
   const loginOutLink = state.userName !== undefined ?
     (<Nav.Link onClick={() => handleLogout()} className="logout-link">{tr("logout")}</Nav.Link>) :
-    (<Nav.Link as={Link} to="/login" style={{display: "inline"}}>{tr('login')}</Nav.Link>);  
+    (<Nav.Link as={Link} to="/login" className="logout-link">{tr('login')}</Nav.Link>);  
   
-  //console.log(state);
   //Navでカレントがactiveにならないのをどうにかしたい
   return (
     <div>
@@ -95,7 +92,7 @@ export const AppNavBar = () => {
           {/* TODO: どのページからもログアウトできるようにする。（その場合ログアウト後に画面を遷移させる必要がある） */}
           {useLocation().pathname === '/' ? (
             <>
-              <Nav style={{display: "inline", wordBreak: 'break-all'}}>{state.userName !== undefined ? state.userName : ""}</Nav>
+              <Nav className="username-text">{state.userName !== undefined ? state.userName : ""}</Nav>
               {loginOutLink}
             </>
           ) : <></>}

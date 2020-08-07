@@ -54,6 +54,19 @@
   display: block;
 }
 
+.login-link {
+  display: inline;
+}
+
+.username-text {
+  display: inline;
+  word-break: break-all;
+}
+
+.rss-url {
+  word-break: break-all;
+}
+
 .comment-row {
   margin-top: 3px;
   margin-bottom: 3px;

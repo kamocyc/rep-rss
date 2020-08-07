@@ -1,19 +1,21 @@
 import React, { createContext, Dispatch, useReducer } from "react";
 
+
 interface GlobalContextType {
   csrfToken: string;
   wasLoginInitialized: boolean;
   userName: string | undefined;
 }
+
+type LoginActionType = 'SET_LOGIN' | 'SET_LOGOUT';
+
 interface LoginAction {
-  type: 'SET_LOGIN' | 'SET_LOGOUT' | 'INC_RSS_UPDATE';
+  type: LoginActionType;
   payload?: string | undefined;
 }
 
 function getCSRFToken(): string {
-  const res = document.cookie.split('; ').find(r => r.startsWith('CSRF-TOKEN'))?.split('=')[1];
-  console.log(document.cookie);
-  return res === undefined ? "" : res;
+  return document.cookie.split('; ').find(r => r.startsWith('CSRF-TOKEN'))?.split('=')[1] ?? ""
 }
 
 const initState: GlobalContextType = {

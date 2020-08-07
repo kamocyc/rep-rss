@@ -59,7 +59,6 @@ const rssReducer: RssResucerType = (rssState, action): RssState => {
       }
     default:
       throw Error("illegal action type: " + action.type);
-      return rssState;
   }
 };
 
@@ -112,7 +111,7 @@ const Rss = ({ rss, index, dispatch }: { rss: Rss, index: number, dispatch: Reac
   return (
     <li>
       <Row className="rss-row">
-        <Col sm={10} style={{wordBreak: "break-all"}}>{ rss.url }</Col>
+        <Col sm={10} className="rss-url">{ rss.url }</Col>
         <Col sm={2}><Button type="button" variant="danger" onClick={() => dispatch(removeRss(index))}>{tr('delete')}</Button></Col>
       </Row>
     </li>

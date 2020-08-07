@@ -109,7 +109,7 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
 };
 
 /////
-export function registerRememberMe(passport: PassportStatic) {
+export function registerAuthentication(passport: PassportStatic) {
   passport.serializeUser(function (user, done) {
     done(null, user);
   });
