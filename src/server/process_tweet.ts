@@ -1,8 +1,8 @@
 import { Status as TweetStatus, FullUser } from 'twitter-d';
 
-export function ProcessTweetsMain(tweets: TweetStatus[], articleTitle: string): {tweets: TweetType[], tweetCount: number} {
+export function processTweetsMain(tweets: TweetStatus[], articleTitle: string): {tweets: TweetType[], tweetCount: number} {
   try {
-    const allTweets = tweets.map(status => convertTweet(articleTitle, status));
+    const allTweets = tweets.map(status => convertTweet(status));
     // remove RTs
     const {commentTweets} = filterComments(allTweets, articleTitle);
     
@@ -21,7 +21,7 @@ export function ProcessTweetsMain(tweets: TweetStatus[], articleTitle: string): 
   }
 }
 
-export function convertTweet(title: string, status: TweetStatus): TweetType {
+function convertTweet(status: TweetStatus): TweetType {
   return {
     tweetOriginalId: status.id_str,
     twProfileImage: (status.user as FullUser).profile_image_url_https,

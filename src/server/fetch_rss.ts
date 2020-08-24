@@ -7,7 +7,7 @@ import Article from './models/article';
 import Rss from './models/rss';
 import Tweet from './models/tweet';
 import User from './models/user';
-import { ProcessTweetsMain, TweetType } from './process_tweet';
+import { processTweetsMain, TweetType } from './process_tweet';
 import { consumerKey, consumerSecret } from './secure_token';
 import { QuerySetting, searchAllTweets, SearchApiStatus } from './twitter_api';
 import { sequelize } from './models/sequelize-loader';
@@ -352,7 +352,7 @@ export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting
     };
   }
   
-  const processed = ProcessTweetsMain(tweets, articleTitle);
+  const processed = processTweetsMain(tweets, articleTitle);
   // console.log({processed: processed});
   
   const { status: status2, tweets: hatebu, count: bmCount } = await getHatenaBookmark(qSet);
