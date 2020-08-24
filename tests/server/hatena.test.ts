@@ -1,4 +1,3 @@
-// @ts-ignore
 import fetch from 'node-fetch';
 import { getHatenaBookmark } from '../../src/server/hatena_bookmark_api';
 
