@@ -3,6 +3,8 @@ import { loadEnv } from './env_loader';
 function prepareEnv() {
   if(process.env.NODE_ENV === 'production') {
     return process.env;
+  } else if(process.env.NODE_ENV === 'test') {
+    return {};
   } else {
     return loadEnv();
   }

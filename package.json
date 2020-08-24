@@ -1,4 +1,6 @@
 {
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "server": "nodemon dist/server/main.js  --exec babel-node",
     "dev": "NODE_ENV=development concurrently \"yarn run client\" \"yarn run server\"",
