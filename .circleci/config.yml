@@ -12,9 +12,24 @@ jobs:
           name: Run YARN tests
 
 orbs:
+  heroku: circleci/heroku@1.2.2
   node: circleci/node@4.0.0
+  
 version: 2.1
+
 workflows:
   test_my_app:
     jobs:
       - test
+      - heroku/deploy-via-git:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test
+          app-name: 'ancient-shelf-27599'
+          pre-deploy:
+            - run: heroku plugins:install heroku-config
+            - run: heroku config:push --app "ancient-shelf-27599"
+              
