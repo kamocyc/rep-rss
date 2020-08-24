@@ -21,7 +21,7 @@ const MAX_API_COUNT = 20;
 
 const rssParser = new Parser();
 
-export interface UserToken {
+interface UserToken {
   consumer_key: string;
   consumer_secret: string;
   access_token_key: string;
@@ -340,7 +340,7 @@ export async function updateRss(rss: RssType, twClient: Twitter): Promise<{
   };
 }
 
-export async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting, articleTitle: string): Promise<{ status: SearchApiStatus, tweets: TweetType[], tweetCount: number }> {
+async function getTwitterReputation(twClient: Twitter, qSet: QuerySetting, articleTitle: string): Promise<{ status: SearchApiStatus, tweets: TweetType[], tweetCount: number }> {
   const { status: status1, tweets: tweets } = await searchAllTweets(qSet, twClient);
   console.log({getTwitterReputation: {status1}});
   
@@ -394,7 +394,7 @@ async function updateArticles(rss: RssType): Promise<{
   return {title: title ?? "", createdArticles};
 }
 
-export async function getArticles(url: string): Promise<{articles: ArticleType[], title?: string}> {
+async function getArticles(url: string): Promise<{articles: ArticleType[], title?: string}> {
   // console.log({url: url});
   const feed = await rssParser.parseURL(url);
   // console.log(feed);

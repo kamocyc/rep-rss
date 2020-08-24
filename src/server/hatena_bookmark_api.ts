@@ -49,7 +49,7 @@ export async function getHatenaBookmark(qSet: QuerySetting): Promise<{ status: S
   
   const allBookmarkCount = data.bookmarks.length;
   
-  console.log({hatebu_data: allBookmarkCount});
+  //console.log({hatebu_data: allBookmarkCount});
   
   const tweets: TweetType[] = 
     data.bookmarks.filter(b => b.comment !== '').map(b => ({

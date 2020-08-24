@@ -59,7 +59,7 @@ function encrypt(text: string, key: Buffer): { iv: string, encrypted: string} {
   };
 }
 
-export function decrypt(encrypted: string, ivString: string, key: Buffer): string {
+function decrypt(encrypted: string, ivString: string, key: Buffer): string {
   const iv = Buffer.from(ivString, 'hex');
   const decipher = crypto.createDecipheriv(encryptAlgorithm, key, iv);
   const decrypted = decipher.update(Buffer.from(encrypted, 'hex'));

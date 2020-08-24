@@ -111,9 +111,9 @@ function filterComments(tweets_: TweetType[], title: string) {
   //IDの降順にソート
   tweets2.sort((a, b) => a.tweetOriginalId < b.tweetOriginalId ? 1 : -1);
   
-  const removedTweets = tweets_.filter(t => tweets2.filter(tt => tt.tweetOriginalId === t.tweetOriginalId).length === 0);
+  // const removedTweets = tweets_.filter(t => tweets2.filter(tt => tt.tweetOriginalId === t.tweetOriginalId).length === 0);
   
-  return { commentTweets: tweets2, removedTweets: removedTweets };
+  return { commentTweets: tweets2 };
 }
 
 function getTweetUrl(status: TweetStatus): string | undefined {
