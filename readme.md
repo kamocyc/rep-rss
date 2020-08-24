@@ -1,6 +1,10 @@
 ## Rep RSS
 
-RSS with Twitter reputation.
+RSS with Twitter and Hatena Bookmark reputation.
+
+Hosted at https://ancient-shelf-27599.herokuapp.com/ .
+
+![screenshot](screenshot.png)
 
 ## How to build
 
