@@ -16,7 +16,7 @@ import Tweet from './models/tweet';
 import User from './models/user';
 import { authMiddleware, registerAuthentication } from './authentication';
 import { registerRss } from './rss';
-import { LoginUser }from './common';
+import { getAuthenticatedUser, LoginUser }from './common';
 import favicon from 'serve-favicon';
 import { SESSION_SECRET } from './secure_token';
 import csrf from 'csurf';
@@ -85,8 +85,9 @@ app.post('/api/update',
   async (req, res) => {
     //DB内の任意のユーザのデータを用いる必要がある？
     //まずは、ログイン後に手動で更新で、
-    if(req.user !== undefined) {
-      const { status, count } = await updateAll((req.user as LoginUser).id);
+    const authUser = getAuthenticatedUser(req);
+    if(authUser !== undefined) {
+      const { status, count } = await updateAll((authUser as LoginUser).id);
       
       res.json({ status: "ok", apiStatus: status, count: count });
     } else {
@@ -98,12 +99,13 @@ app.post('/api/update',
 app.post('/api/update_tweet',
   csrfProtection,
   async (req, res) => {
-    if(req.user !== undefined) {
+    const authUser = getAuthenticatedUser(req);
+    if(authUser !== undefined) {
       const pointLowerBound = req.query.point_lower_bound ? parseInt(req.query.point_lower_bound as string) : 3;
       const sinceDayMinus = req.query.since_day_minus ? parseInt(req.query.since_day_minus as string) : 1;
       const lastElapsed = req.query.last_elapsed ? parseInt(req.query.last_elapsed as string) : 15;
       
-      const { status, count } = await updateTweetsEntry((req.user as LoginUser).id, pointLowerBound, sinceDayMinus, lastElapsed);
+      const { status, count } = await updateTweetsEntry((authUser as LoginUser).id, pointLowerBound, sinceDayMinus, lastElapsed);
       
       res.json({ status: "ok", apiStatus: status, count: count });
     } else {
@@ -121,15 +123,14 @@ registerComment(app, csrfProtection);
 registerRss(app, csrfProtection);
 
 app.post('/api/login_user', authMiddleware, csrfProtection, (req, res) => {
-
-  if(req.session !== undefined) {              
+  if(req.session !== undefined) {
     req.session.save(() => {
       res.header('Access-Control-Allow-Credentials','true');
-      res.send({userInfo: req.user});
+      res.send({userInfo: getAuthenticatedUser(req)});
     })
   } else {
     res.header('Access-Control-Allow-Credentials','true');
-    res.send({userInfo: req.user});
+    res.send({userInfo: getAuthenticatedUser(req)});
   }
 });
 

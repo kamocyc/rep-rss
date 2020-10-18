@@ -49,10 +49,21 @@ First, you must build files.
 $ yarn build
 ```
 
-Then run with environment variables.
+Then, create ``.env`` file in the repository's root directory.
+
+```env.
+CONSUMER_KEY="YOUR_CONSUMER_KEY"
+CONSUMER_SECRET="YOUR_CONSUMER_SECRET"
+SITE_URL="http://127.0.0.1:8080/"
+APP_HASH_KEY="YOUR_CHOOSING_APP_HASH_KEY"
+APP_ENC_KEY="YOUR_CHOOSING_APP_ENC_KEY"
+SESSION_SECRET = "YOUR_CHOOSING_SESSION_SECRET"
+```
+
+Now, run the app.
 
 ```
-CONSUMER_KEY="YOUR_CONSUMER_KEY" CONSUMER_SECRET="YOUR_CONSUMER_SECRET" SITE_URL="http://127.0.0.1:8080/" APP_HASH_KEY="YOUR_CHOSEN_APP_HASH_KEY" APP_ENC_KEY="YOUR_CHOSEN_APP_ENC_KEY" SESSION_SECRET="YOUR_CHOOSING_SESSION_SECRET" yarn dev
+yarn dev
 ```
 
 ## Deploy to Heroku
@@ -65,18 +76,15 @@ $ heroku create
 $ heroku addons:create heroku-postgresql:hobby-dev
 ```
 
-First, create ``.env`` file in the repository's root directory.
+Change ``SITE_URL`` in the ``.env`` file to URL of the Heroku app.
 
-```env.
-CONSUMER_KEY="YOUR_CONSUMER_KEY"
-CONSUMER_SECRET="YOUR_CONSUMER_SECRET"
-SITE_URL="HEROKU_SITE_URL"
-APP_HASH_KEY="YOUR_CHOOSING_APP_HASH_KEY"
-APP_ENC_KEY="YOUR_CHOOSING_APP_ENC_KEY"
-SESSION_SECRET = "YOUR_CHOOSING_SESSION_SECRET"
+```
+...
+SITE_URL="https://your-heroku-app-url/"
+...
 ```
 
-Push config to Heroku.
+Push config (the ``.evn`` file) to Heroku.
 
 ```
 $ heroku plugins:install heroku-config

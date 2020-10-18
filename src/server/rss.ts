@@ -1,12 +1,14 @@
 import { Express } from 'express';
-import { LoginUser } from './common';
+import { getAuthenticatedUser, LoginUser } from './common';
 import Rss from './models/rss';
 import User from './models/user';
 
 export function registerRss(app: Express, csrfProtection: any) {
   app.get('/api/rss_get', csrfProtection, async function (req, res) {
-    if(req.isAuthenticated()) {
-      const user = await User.findByPk((req.user as LoginUser).id);
+    const authUser = getAuthenticatedUser(req);
+    
+    if(authUser !== undefined) {
+      const user = await User.findByPk((authUser as LoginUser).id);
       if(user === null) {
         res.json({ 'status': 'not_logged_in', articles: [] });
         return;
@@ -32,9 +34,11 @@ export function registerRss(app: Express, csrfProtection: any) {
   });
 
   app.post('/api/rss_update', async function (req, res) {
-    if(req.isAuthenticated() && req.user) {
+    const authUser = getAuthenticatedUser(req);
+    
+    if(authUser !== undefined) {
       {
-        const user = await User.findByPk((req.user as LoginUser).id,
+        const user = await User.findByPk((authUser as LoginUser).id,
           {
             include: [ Rss ]
           });
@@ -81,7 +85,7 @@ export function registerRss(app: Express, csrfProtection: any) {
       }
       
       {
-        const user = await User.findByPk(req.user ? (req.user as LoginUser).id : undefined);
+        const user = await User.findByPk(authUser ? (authUser as LoginUser).id : undefined);
         const rsses = await (user as any).getRsses() as Rss[];
         
         res.json({

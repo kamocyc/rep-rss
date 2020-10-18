@@ -5,25 +5,6 @@ import { encryptToken } from './common';
 import User from './models/user';
 import { APP_HASH_KEY, consumerKey, consumerSecret, siteUrl } from './secure_token';
 
-// function consumeRememberMeToken(token: string, fn: (err: any, userId?: string) => void) {
-//   User.destroy({ where: { rememberToken: token }}).then((users) => {
-//     if(users.length === 0) {
-//       return fn("no_token", undefined);
-//     } else if(users.length >= 2) {
-//       throw new Error("Illegal users.length");
-//     }
-    
-//     const user = users[0];
-//     const userId = user.userId;
-    
-//     // invalidate the single-use token
-//     user.userId = null;
-//     user.save().then(() => {
-//       return fn(undefined, userId);
-//     });
-//   });
-// }
-
 function saveRememberMeToken(token: string, userId: string, username: string, oauthToken: string, oauthTokenSecret: string, fn: (err?: any) => void) {
   User.findOne({ where: { userId: userId }}).then((user) => {
     if(user === null) {
@@ -57,8 +38,6 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
   } else if(req.cookies.remember_me) {
     const [rememberToken, hash] = (req.cookies.remember_me as string).split('|');
     
-    // console.log({hah: [rememberToken, hash]});
-    
     User.findAll({
       where: {
         rememberToken: rememberToken
@@ -77,34 +56,26 @@ export const authMiddleware = (req: any, res: any, next: () => void) => {
         
         if(hash === verifyingHash) {
           console.log("auth done!");
-          // process.nextTick(() => {
-            //TODO: 認証
-            // return processTwitterLogin(req, user.oauthToken, user.oauthTokenSecret, user.userId, user.username, undefined, (e, u) => {
-              return req.login({
-                id: user.userId,
-                username: user.username
-              }, (err: any) => {
-                console.log("logged in!");
-                console.log({err: err});
-                
-                // TODO: セキュリティ的はここで remember_me を再度更新すべき
-                next();
-              });
-            // });
-          // });
+          
+          return req.login({
+            id: user.userId,
+            username: user.username
+          }, (err: any) => {
+            console.log("logged in!");
+            console.log({err: err});
+            
+            // TODO: セキュリティ的はここで remember_me を再度更新すべき
+            next();
+          });
         }
-        
-        //console.log({hash, verifyingHash});
       }
       
       console.log("user not found");
       next();
-      //res.redirect(302, '/login');
     });
   } else {
     console.log("no token");
     next();
-    //res.redirect(302, '/login');
   }
 };
 
@@ -125,9 +96,7 @@ export function registerAuthentication(passport: PassportStatic) {
     passReqToCallback: true,
   },
     function (req, token, tokenSecret, profile, done) {      
-      process.nextTick(function () {
-        // console.log({profile: profile});
-        
+      process.nextTick(function () {        
         return processTwitterLogin(req, token, tokenSecret, profile.id, profile.displayName, profile, done);
       });
   }));

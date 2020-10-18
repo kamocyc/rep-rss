@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import { Op, Sequelize } from 'sequelize';
-import { flatten, LoginUser, subtractDays } from './common';
+import { flatten, getAuthenticatedUser, LoginUser, subtractDays } from './common';
 import Article from './models/article';
 import Rss from './models/rss';
 import User from './models/user';
@@ -37,10 +37,11 @@ export function registerArticle(app: Express, csrfProtection: any) {
       //これがないと、304 (cached) になって更新されない！
       res.setHeader('Last-Modified', (new Date()).toUTCString());
       
-      if(req.isAuthenticated() && req.user) {
+      const authUser = getAuthenticatedUser(req);
+      if(authUser !== undefined) {
         const TOP_COUNT = req.query.count ? parseInt(req.query.count as string) : 150;
         
-        const user = await User.findByPk((req.user as LoginUser).id ,{
+        const user = await User.findByPk((authUser as LoginUser).id ,{
           include: [
             {
               model: Rss,
@@ -88,7 +89,7 @@ export function registerArticle(app: Express, csrfProtection: any) {
         const articles = flatten(((user as any).Rsses as Rss[]).map(r => (r as any).Articles as Article[]));
         
         if(articles.length === 0) {
-          const user_ = await User.findByPk((req.user as LoginUser).id, {
+          const user_ = await User.findByPk((authUser as LoginUser).id, {
             include: [
               {
                 model: Rss,

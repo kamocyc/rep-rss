@@ -89,3 +89,18 @@ export function subtractMinutes(date_: Date, minutes: number): Date {
   date.setMinutes(date.getMinutes() - minutes);
   return date;
 }
+
+export function getAuthenticatedUser(req: Express.Request): Express.User | undefined {
+  if(req.isAuthenticated()) {
+    return req.user;
+  } else {
+    //TODO: 初期表示用ユーザ。もっとうまい作りにする
+    return {
+      displayName: "kamoeng",
+      id: "1233587877398765570",
+      provider: "twitter",
+      username: "kamoeng1"
+    };
+    //return undefined;
+  }
+}
